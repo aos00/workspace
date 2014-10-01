@@ -9,21 +9,20 @@ using namespace cv;
 
 int main(int argc, const char** argv){
 	CvCapture* capture = 0;
-	Mat frame, frameCopy, image;
+	Mat frame, frameCopy;
 	
 	capture = cvCaptureFromCAM(CV_CAP_ANY);
 	
 	if(!capture)
 		cout << "Nenhuma camera detectada"<< endl;
-		
-	cvNamedWindow("resultado",CV_WINDOW_AUTOSIZE);
 	
 	if(capture){
 		cout << "In capure ..." << endl;
+		IplImage* iplImg;
 		for(;;){
-			IplImage* iplImg = cvQueryFrame(capture);
+			iplImg = cvQueryFrame(capture);
 			frame = iplImg;
-			cout << "Canais:" << iplImg->nChannels << endl;
+			//cout << "Canais:" << iplImg->nChannels << endl;
 			
 			if(frame.empty()) break;
 			
@@ -32,7 +31,11 @@ int main(int argc, const char** argv){
 			else
 				flip(frame, frameCopy, 0);
 				
-			cvShowImage("result",iplImg);
+			//cvShowImage("NDVI",iplImg);
+			Mat output(frame.size(), frame.type());
+			vector<Mat> rgb;	
+			split(frame,rgb);
+			imshow("NDVI",(rgb[2]-rgb[0]/(rgb[2] + rgb[0])));
 			
 			if(waitKey(10) >= 0)
 				break;
@@ -41,6 +44,6 @@ int main(int argc, const char** argv){
 		
 	}
 	cvReleaseCapture(&capture);
-	cvDestroyWindow("result");
+	cvDestroyWindow("NDVI");
 	return 0;
 }
