@@ -14,7 +14,7 @@ int main(int argc, const char** argv){
 	capture = cvCaptureFromCAM(CV_CAP_ANY);
 	
 	if(!capture)
-		cout << "Nenhuma camera default detectada"<< endl;
+		cout << "Nenhuma camera detectada"<< endl;
 		
 	cvNamedWindow("resultado",CV_WINDOW_AUTOSIZE);
 	
