@@ -1,0 +1,14 @@
+#### CREATE REPOSITORY
+
+touch README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/aos00/workspace.git
+git push -u origin master
+
+
+#### PUSH AN EXISTING REPOSITORY
+
+git remote add origin https://github.com/aos00/workspace.git
+git push -u origin master
