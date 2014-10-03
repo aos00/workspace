@@ -1,11 +1,9 @@
-﻿Build started 10/1/2014 11:11:05 PM.
+﻿Build started 10/2/2014 2:54:43 PM.
      1>Project "C:\Users\Mr. Anderson\Documents\TCC1-2\workspace\NDVI\principal\win\ndvi\ConsoleApplication1\ConsoleApplication1\ConsoleApplication1.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(388,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ConsoleApplication1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ID:\opencv\build\x86\vc12\..\..\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt nvdi.cpp
          nvdi.cpp
-     1>c:\users\mr. anderson\documents\tcc1-2\workspace\ndvi\principal\win\ndvi\consoleapplication1\consoleapplication1\nvdi.cpp(13): warning C4101: 'coluna' : unreferenced local variable
-     1>c:\users\mr. anderson\documents\tcc1-2\workspace\ndvi\principal\win\ndvi\consoleapplication1\consoleapplication1\nvdi.cpp(13): warning C4101: 'linha' : unreferenced local variable
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Mr. Anderson\Documents\TCC1-2\workspace\NDVI\principal\win\ndvi\ConsoleApplication1\Debug\NVDI.exe" /INCREMENTAL /NOLOGO /LIBPATH:D:\opencv\build\x86\vc12\lib opencv_core249d.lib opencv_imgproc249d.lib opencv_highgui249d.lib opencv_ml249d.lib opencv_video249d.lib opencv_features2d249d.lib opencv_calib3d249d.lib opencv_objdetect249d.lib opencv_contrib249d.lib opencv_legacy249d.lib opencv_flann249d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Mr. Anderson\Documents\TCC1-2\workspace\NDVI\principal\win\ndvi\ConsoleApplication1\Debug\NVDI.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Mr. Anderson\Documents\TCC1-2\workspace\NDVI\principal\win\ndvi\ConsoleApplication1\Debug\NVDI.lib" /MACHINE:X86 Debug\nvdi.obj
          ConsoleApplication1.vcxproj -> C:\Users\Mr. Anderson\Documents\TCC1-2\workspace\NDVI\principal\win\ndvi\ConsoleApplication1\Debug\NVDI.exe
@@ -13,4 +11,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.99
+Time Elapsed 00:00:01.43
