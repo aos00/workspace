@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdio.h>
 
-#define RUIDO_INFERIOR 5
+#define RUIDO_INFERIOR 2
 
 using namespace std;
 using namespace cv;
@@ -388,19 +388,23 @@ using namespace cv;
 
 //----------------------TESTE DAS FUNÇÕES DE CALCULO DO NDVI --------------------------------
 
-void blueIteration(Mat& I);
-void redIteration(Mat& I);
+void blueIteration(Mat& scr, Mat& ndvi);
+void redIteration(Mat& scr, Mat& ndvi);
 void antiLowerNoise(Mat& I);
 void ndviCalculation(Mat& src, Mat& dst);
+void convertToGrayScale(Mat& src, Mat& dst);
 void pseudoColor(Mat& src, Mat& dst);
 void printMat(Mat& src);
 Size frameSize;
 
 int main(int argc, const char** argv){
 	
-		Mat red(2, 2, CV_8U, Scalar(0));
-		Mat blue(red.size(), CV_8U, Scalar(100));
-		Mat green(red.size(), CV_8U, Scalar(200));
+	/*
+	*	Generating a frame
+	*/
+		Mat red(2, 2, CV_8U, Scalar(20));
+		Mat blue(red.size(), CV_8U, Scalar(255));
+		Mat green(red.size(), CV_8U, Scalar(0));
 
 		Mat frame[3];
 		frame[0] = blue;
@@ -409,13 +413,21 @@ int main(int argc, const char** argv){
 
 		Mat mergedFrame;
 		merge(frame, 3, mergedFrame);
-
-		//cout << "Frame: " << mergedFrame << endl << endl;
-		Mat ndvi;
-		ndviCalculation(mergedFrame, ndvi);
-
-		cout << "Frame: " << mergedFrame << endl << endl;
 		printMat(mergedFrame);
+
+		/*
+		*	End of frame generation
+		*/
+		
+		Mat ndvi;
+
+		ndviCalculation(mergedFrame, ndvi); //Calculate NDVI
+
+		convertToGrayScale(ndvi, ndvi); //Convert ndvi matrix to 8 bit gray scale
+		cout << "GRAY SCALE" << ndvi << endl;
+
+		pseudoColor(ndvi, ndvi);
+		
 		system("pause");
 	
 
@@ -424,12 +436,13 @@ int main(int argc, const char** argv){
 }
 
 void printMat(Mat& src){
-
+	cout << endl << "------------- PRINT MATRIX ---------" << endl;
+	
 	CV_Assert(src.isContinuous());
 
 	short nChannels = src.channels();
-	/*Size size = src.size();
-	int a = size.*/
+
+	cout << "Number of channels: " << nChannels << endl;
 
 	int nRows = src.rows;
 	int nCols = src.cols;
@@ -438,18 +451,56 @@ void printMat(Mat& src){
 	uchar* p;
 
 	short channel =0;
-	p = src.ptr<uchar>(0);
+	p = src.ptr<uchar>(0);	
+
 	while (channel < nChannels){
-		cout << "Imprimindo canal " << channel << endl;
+		cout << endl << "Imprimindo canal " << channel << endl;
 		j = 0;
-		for (i = channel; i < nRows*nCols*nChannels; i++){
-			j = i * 3;
-			if (i >= nCols)
+		short n = 0;
+		for (i = 0 ; i < nRows*nCols; i++){
+			j = i * 3 + channel;
+			if (n >= nCols){
+				n = 0;
 				cout << endl;
-			cout << " " << (int) p[j];
+			}
+				cout << " " << (int)p[j];
+				n++;
 		}
 		channel++;
 	}
+	cout << endl;
+	cout << "------------- END OF PRINT MATRIX ---------" << endl;
+}
+
+void printMat2(Mat& src){
+	cout << endl << "------------- PRINT MATRIX ---------" << endl;
+
+	CV_Assert(src.isContinuous());
+
+	short nChannels = src.channels();
+
+	cout << "Number of channels: " << nChannels << endl;
+
+	int nRows = src.rows;
+	int nCols = src.cols;
+
+	short i, n, j;
+	uchar* p;
+
+	short channel = 0;
+	p = src.ptr<uchar>(0);
+	j = 0;
+	n = 0;
+	for (i = 0; i < nRows*nCols; i++){
+		if (n >= nCols){
+			n = 0;
+			cout << endl;
+		}
+		cout << " " << (int)p[i];
+		n++;
+	}
+	cout << endl;
+	cout << "------------- END OF PRINT MATRIX ---------" << endl;
 }
 
 
@@ -459,33 +510,42 @@ void ndviCalculation(Mat& src, Mat& dst){
 	CV_Assert(dst.channels() == 1); //Garantir que a matriz de saida tem 1 canal (Grayscale)
 	CV_Assert(src.isContinuous()); //Garantir que a matriz é continua
 
-	int nCols = src.cols * 3;
-
 	Mat rgb[3];
 	Mat soma(frameSize, CV_32F);
 	Mat subtracao(frameSize, CV_32F);
-	Mat ndvi(frameSize, CV_32F);
 
 	split(src, rgb);
 
 	//Adicionar e subtrair os canais
 	add(rgb[2], rgb[0], soma, noArray(), CV_32F);
+	cout << "NVDI SOMA" << soma << endl;
 
 	antiLowerNoise(soma); // Evitar ruido de baixa intensidade;
-
+	 
 	subtract(rgb[2], rgb[0], subtracao, noArray(), CV_32F); // fazer subtracao
+	cout << "NVDI SUBTRACAO" << subtracao << endl;
 
 	//Dividir os canais
-	divide(subtracao, soma, ndvi, 1, CV_32F);
-
-	add(ndvi, 1, ndvi, noArray(), CV_32F);
-	multiply(ndvi, 127, ndvi, 1.0, CV_32F);
-
-	ndvi.convertTo(dst, CV_8U);
+	divide(subtracao, soma, dst, 1, CV_32F);
+	cout << "NVDI DIVISAO" << dst << endl;	
 
 }
 
+void convertToGrayScale(Mat& src, Mat& dst){
+	cout << "NVDI DIVISAO" << src << endl;
+
+	add(src, 1, src, noArray(), CV_32F);
+	multiply(src, 127, src, 1.0, CV_32F);
+	src.convertTo(dst, CV_8U);
+	
+
+	
+}
+
 void antiLowerNoise(Mat& I){
+
+	CV_Assert(I.type() == CV_32F);
+
 	int channels = I.channels();
 
 	int nRows = I.rows;
@@ -498,10 +558,10 @@ void antiLowerNoise(Mat& I){
 	}
 
 	int i, j;
-	uchar* p;
+	float* p;
 	for (i = 0; i < nRows; ++i)
 	{
-		p = I.ptr<uchar>(i);
+		p = I.ptr<float>(i);
 		for (j = 0; j < nCols; ++j)
 		{
 			if (p[j] < RUIDO_INFERIOR)
@@ -510,77 +570,94 @@ void antiLowerNoise(Mat& I){
 	}
 }
 
-void blueIteration(Mat& I){
-	int channels = I.channels();
+void blueIteration(Mat& src, Mat& ndvi)
+{
+	// accept only char type matrices
+	//CV_Assert(I.depth() != sizeof(uchar));
+	CV_Assert(src.type() == ndvi.type());
+	CV_Assert(src.channels() == src.channels());
 
-	int nRows = I.rows;
-	int nCols = I.cols * channels;
+	int channels = src.channels();
 
-	if (I.isContinuous())
+	int nRows = src.rows;
+	int nCols = src.cols * channels;
+
+	if (src.isContinuous())
 	{
 		nCols *= nRows;
 		nRows = 1;
 	}
 
 	int i, j;
-	uchar* p;
+	uchar* pNdvi;
+	uchar* pBlueChannel;
 	for (i = 0; i < nRows; ++i)
 	{
-		p = I.ptr<uchar>(i);
+		pBlueChannel = src.ptr<uchar>(i);
+		pNdvi = ndvi.ptr<uchar>(i);
 		for (j = 0; j < nCols; ++j)
 		{
-			if (p[j] >= 128)
-				p[j] = 0;
+			if (pNdvi[j] >= 128)
+				pBlueChannel[j] = 0;
 		}
 	}
 }
 
-void redIteration(Mat& I)
+void redIteration(Mat& src, Mat& ndvi)
 {
 	// accept only char type matrices
 	//CV_Assert(I.depth() != sizeof(uchar));
+	CV_Assert(src.type() == ndvi.type());
+	CV_Assert(src.channels() == src.channels());
 
-	int channels = I.channels();
+	int channels = src.channels();
 
-	int nRows = I.rows;
-	int nCols = I.cols * channels;
+	int nRows = src.rows;
+	int nCols = src.cols * channels;
 
-	if (I.isContinuous())
+	if (src.isContinuous())
 	{
 		nCols *= nRows;
 		nRows = 1;
 	}
 
 	int i, j;
-	uchar* p;
+	uchar* pNdvi;
+	uchar* pRedChannel;
 	for (i = 0; i < nRows; ++i)
 	{
-		p = I.ptr<uchar>(i);
+		pRedChannel = src.ptr<uchar>(i);
+		pNdvi = ndvi.ptr<uchar>(i);
 		for (j = 0; j < nCols; ++j)
 		{
-			if (p[j] < 128)
-				p[j] = 0;
+			if (pNdvi[j] < 128)
+				pRedChannel[j] = 0;
 		}
 	}
 }
 
 void pseudoColor(Mat& src, Mat& dst){
 	CV_Assert(src.channels() == 1);
-	CV_Assert(dst.channels() == 3);
+	CV_Assert(src.type() == CV_8U);
+	//CV_Assert(dst.channels() == 3);
+	CV_Assert(dst.type() == CV_8U);
 
 	Mat ndviPseudoColored[3];
 
 	ndviPseudoColored[2] = (src - 128) * 2; //Canal do vermelho
-	ndviPseudoColored[0] = ((255 - src) - 128) * 2; //Canal do azul
+	cout << "ndviPseudoColored[2]" << ndviPseudoColored[2] << endl;
 
-	redIteration(ndviPseudoColored[2]);
-	blueIteration(ndviPseudoColored[0]);
+	ndviPseudoColored[0] = ((255 - src) - 128) * 2; //Canal do azul
+	cout << "ndviPseudoColored[0]" << ndviPseudoColored[0] << endl;
+
+	redIteration(ndviPseudoColored[2], src); //Remover
+	blueIteration(ndviPseudoColored[0], src); //Remover
 
 	ndviPseudoColored[1] = 255 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
 
 	merge(ndviPseudoColored, 3, dst);
-
-	//cout << "Frame" << dst << endl;
+	cout << "Pseudo colored NDVI" << dst << endl;
+	
 
 
 }

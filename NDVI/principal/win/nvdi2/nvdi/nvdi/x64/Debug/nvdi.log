@@ -1,4 +1,4 @@
-﻿Build started 10/4/2014 8:47:20 PM.
+﻿Build started 10/5/2014 9:15:44 PM.
      1>Project "C:\Users\Mr. Anderson\Documents\TCC1-2\workspace\NDVI\principal\win\nvdi2\nvdi\nvdi\nvdi.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /ID:\opencv\build\x64\vc12\..\..\include /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source.cpp
@@ -10,4 +10,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.93
+Time Elapsed 00:00:00.88
