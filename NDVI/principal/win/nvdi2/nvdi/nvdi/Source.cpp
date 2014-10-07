@@ -692,7 +692,7 @@ int main(int argc, const char** argv){
 	pseudoColor(gray, falsecolor);
 
 	Mat rgb[3];
-	split(falsecolor, rgb);
+	split(falsecolor, rgb);d
 	cout << "Vermelho False color " << (int) rgb[2].at<uchar>(30, 30) << endl;
 	cout << "Verde False color " << (int)rgb[1].at<uchar>(30, 30) << endl;
 	cout << "Azul False color " << (int)rgb[0].at<uchar>(30, 30) << endl;
