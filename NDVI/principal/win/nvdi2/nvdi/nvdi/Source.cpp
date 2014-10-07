@@ -21,48 +21,55 @@ void pseudoColor(Mat& src, Mat& dst);
 void printMat(Mat& src);
 Size frameSize;
 
-int main(int argc, const char** argv){
-	short limiteInferior = 3;
-	Mat frame;	
-
-	VideoCapture capture(CV_CAP_ANY);
-
-	CV_Assert(capture.isOpened());
-
-		cout << "In capure ..." << endl;
-			
-		frameSize = frame.size();
-
-		Mat gray(frameSize, CV_8UC1);
-		Mat ndvi(frameSize, CV_32FC1);
-
-		for (;;){
-			capture >> frame;
-			frameSize = frame.size();
-
-			ndviCalculation(frame, ndvi); //Calculate NDVI
-
-			convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
-		
-			pseudoColor(gray, frame);
-		
-			//system("pause");				
-
-			imshow("NDVI", frame);
-				
-			if (waitKey(10) >= 0)
-				break;
-		}
-		waitKey(0);
-
-		//}
-		//cvReleaseCapture(&capture);
-		//cvDestroyWindow("NDVI");
-		destroyAllWindows();
-
-
-	return 0;
-}
+//int main(int argc, const char** argv){
+//	short limiteInferior = 3;
+//	Mat frame;	
+//
+//	VideoCapture capture(CV_CAP_ANY);
+//
+//	CV_Assert(capture.isOpened());
+//
+//		cout << "In capure ..." << endl;
+//			
+//		frameSize = frame.size();
+//
+//		Mat gray(frameSize, CV_8UC1);
+//		Mat ndvi(frameSize, CV_32FC1);
+//
+//		for (;;){
+//			capture >> frame;
+//			
+//			imshow("Frame", frame);
+//			
+//			frameSize = frame.size();
+//			
+//			ndviCalculation(frame, ndvi); //Calculate NDVI
+//
+//			imshow("NDVI", ndvi);
+//
+//			convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
+//		
+//			imshow("gray", gray);
+//
+//			pseudoColor(gray, frame);
+//		
+//			//system("pause");				
+//
+//			imshow("False color", frame);
+//				
+//			if (waitKey(10) >= 0)
+//				break;
+//		}
+//		waitKey(0);
+//
+//		//}
+//		//cvReleaseCapture(&capture);
+//		//cvDestroyWindow("NDVI");
+//		destroyAllWindows();
+//
+//
+//	return 0;
+//}
 
 void ndviCalculation(Mat& src, Mat& dst){
 
@@ -76,27 +83,30 @@ void ndviCalculation(Mat& src, Mat& dst){
 
 	split(src, rgb);
 
-	cout << "tipo" << dst.type() << endl;
-	dst = ((rgb[2] - rgb[0]) / (rgb[2] + rgb[0]));
-	cout << "tipo" << dst.type() << endl;
+	cout << "Vermelho: " << (int)rgb[2].at<uchar>(30, 30) << endl;
+	cout << "Azul: " << (int)rgb[0].at<uchar>(30, 30) << endl;
+
+	//cout << "tipo" << dst.type() << endl;
+	//dst = ((rgb[2] - rgb[0]) / (rgb[2] + rgb[0]));
+	//cout << "tipo" << dst.type() << endl;
 	////Adicionar e subtrair os canais
-	//add(rgb[2], rgb[0], soma, noArray(), CV_32F);
+	add(rgb[2], rgb[0], soma, noArray(), CV_32F);
 	////cout << "NVDI SOMA" << soma << endl;
 
-	//antiLowerNoise(soma); // Evitar ruido de baixa intensidade;
+	antiLowerNoise(soma); // Evitar ruido de baixa intensidade;
 	// 
-	//subtract(rgb[2], rgb[0], subtracao, noArray(), CV_32F); // fazer subtracao
+	subtract(rgb[2], rgb[0], subtracao, noArray(), CV_32F); // fazer subtracao
 	////cout << "NVDI SUBTRACAO" << subtracao << endl;
 
 	////Dividir os canais
-	//divide(subtracao, soma, dst, 1, CV_32F);
+	divide(subtracao, soma, dst, 1, CV_32F);
 	//cout << "NVDI DIVISAO" << dst << endl;	
 
 }
 
 void convertToGrayScale(Mat& src, Mat& dst){
-	cout << src.type() << endl;
-	cout << CV_32FC1 << endl;
+	//cout << src.type() << endl;
+	//cout << CV_32FC1 << endl;
 	CV_Assert(src.type() == CV_32FC1);
 	CV_Assert(dst.type() == CV_8UC1);
 	
@@ -211,8 +221,8 @@ void pseudoColor(Mat& src, Mat& dst){
 	ndviPseudoColored[0] = ((255 - src) - 128) * 2; //Canal do azul
 	//cout << "ndviPseudoColored[0]" << ndviPseudoColored[0] << endl;
 
-	redIteration(ndviPseudoColored[2], src); //Remover
-	blueIteration(ndviPseudoColored[0], src); //Remover
+	//redIteration(ndviPseudoColored[2], src); //Remover
+	//blueIteration(ndviPseudoColored[0], src); //Remover
 
 	ndviPseudoColored[1] = 255 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
 
@@ -224,6 +234,8 @@ void pseudoColor(Mat& src, Mat& dst){
 
 
 //-----------INICIANDO E TESTE DE CAPTURA CAMERA -------------
+
+
 //int main(int argc, const char** argv){
 //
 //	Mat frame;
@@ -313,7 +325,7 @@ void pseudoColor(Mat& src, Mat& dst){
 //	return I;
 //}
 
-	//----------------------------LER IMAGEM DO DISCO--------------------------------------------------
+//----------------------------LER IMAGEM DO DISCO--------------------------------------------------
 /**			
 
 	int main(int argc, const char** argv){
@@ -340,10 +352,6 @@ void pseudoColor(Mat& src, Mat& dst){
 	return 0;
 	}
 	*/
-
-
-	
-
 
 //------------------------TESTANDO WEBCAM-----------------------------------------------------------
 
@@ -650,3 +658,52 @@ void pseudoColor(Mat& src, Mat& dst){
 //
 //
 //}
+
+
+//------------------ Teste do NDVI com imagem do disco -------------------------
+int main(int argc, const char** argv){
+
+	Mat ndvi(frameSize, CV_32FC1);
+	Mat gray(frameSize, CV_8U);
+	Mat ndvi2(frameSize, CV_8U);
+	Mat falsecolor(frameSize, CV_8UC3);
+	Mat imagem;
+	imagem = imread("imagem3.png", 1);
+
+	if (!imagem.data)
+	{
+		cout << "Could not open or find the image" << std::endl;
+		return -1;
+	}
+	//CV_Assert(imagem != 0);
+
+	frameSize = imagem.size();
+
+	ndvi.convertTo(ndvi2, CV_8U);
+
+	ndviCalculation(imagem, ndvi);
+
+	cout << "ndvi " << ndvi.at<float>(30, 30) << endl;
+
+	convertToGrayScale(ndvi, gray);
+
+	cout << "Gray " << (int)gray.at<uchar>(30, 30) << endl;
+
+	pseudoColor(gray, falsecolor);
+
+	Mat rgb[3];
+	split(falsecolor, rgb);
+	cout << "Vermelho False color " << (int) rgb[2].at<uchar>(30, 30) << endl;
+	cout << "Verde False color " << (int)rgb[1].at<uchar>(30, 30) << endl;
+	cout << "Azul False color " << (int)rgb[0].at<uchar>(30, 30) << endl;
+
+	//cout << imagem << endl;
+	//imshow("ndvi", ndvi);
+	//imshow("NDVI", ndvi2);
+	imshow("gray", gray);
+	imshow("False color", falsecolor);
+	imshow("imagem", imagem);
+
+	waitKey(0);
+	return 0;
+}
