@@ -3,6 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include <stdio.h>
+#include <vector>
 
 #define RUIDO_INFERIOR 5
 
@@ -22,7 +23,7 @@ void printMat(Mat& src);
 Size frameSize;
 
 //int main(int argc, const char** argv){
-//	short limiteInferior = 3;
+//	short limiteInferior = 5;
 //	Mat frame;	
 //
 //	VideoCapture capture(CV_CAP_ANY);
@@ -39,23 +40,30 @@ Size frameSize;
 //		for (;;){
 //			capture >> frame;
 //			
-//			imshow("Frame", frame);
+//
+//			Mat rgb[3];
+//			split(frame, rgb);
+//
+//			imshow("Vermelho", rgb[2]);
+//			//imshow("Frame", frame);
+//
+//			//cout << frame << endl;
 //			
 //			frameSize = frame.size();
 //			
-//			ndviCalculation(frame, ndvi); //Calculate NDVI
+//			//ndviCalculation(frame, ndvi); //Calculate NDVI
 //
-//			imshow("NDVI", ndvi);
+//			//imshow("NDVI", ndvi);
 //
-//			convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
+//			//convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
 //		
-//			imshow("gray", gray);
+//			//imshow("gray", gray);
 //
-//			pseudoColor(gray, frame);
+//			//pseudoColor(gray, frame);
 //		
 //			//system("pause");				
 //
-//			imshow("False color", frame);
+//			//imshow("False color", frame);
 //				
 //			if (waitKey(10) >= 0)
 //				break;
@@ -83,8 +91,8 @@ void ndviCalculation(Mat& src, Mat& dst){
 
 	split(src, rgb);
 
-	cout << "Vermelho: " << (int)rgb[2].at<uchar>(30, 30) << endl;
-	cout << "Azul: " << (int)rgb[0].at<uchar>(30, 30) << endl;
+	//cout << "Vermelho: " << (int)rgb[2].at<uchar>(30, 30) << endl;
+	//cout << "Azul: " << (int)rgb[0].at<uchar>(30, 30) << endl;
 
 	//cout << "tipo" << dst.type() << endl;
 	//dst = ((rgb[2] - rgb[0]) / (rgb[2] + rgb[0]));
@@ -224,7 +232,7 @@ void pseudoColor(Mat& src, Mat& dst){
 	//redIteration(ndviPseudoColored[2], src); //Remover
 	//blueIteration(ndviPseudoColored[0], src); //Remover
 
-	ndviPseudoColored[1] = 255 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
+	ndviPseudoColored[1] = 128 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
 
 	merge(ndviPseudoColored, 3, dst);
 	//cout << "Pseudo colored NDVI" << dst << endl;
@@ -667,8 +675,9 @@ int main(int argc, const char** argv){
 	Mat gray(frameSize, CV_8U);
 	Mat ndvi2(frameSize, CV_8U);
 	Mat falsecolor(frameSize, CV_8UC3);
-	Mat imagem;
-	imagem = imread("imagem3.png", 1);
+	Mat imagem, infragram, diferenca;
+	imagem = imread("teste1.png", 1);
+	infragram = imread("teste2.png", 1);
 
 	if (!imagem.data)
 	{
@@ -691,11 +700,23 @@ int main(int argc, const char** argv){
 
 	pseudoColor(gray, falsecolor);
 
-	Mat rgb[3];
-	split(falsecolor, rgb);d
-	cout << "Vermelho False color " << (int) rgb[2].at<uchar>(30, 30) << endl;
-	cout << "Verde False color " << (int)rgb[1].at<uchar>(30, 30) << endl;
-	cout << "Azul False color " << (int)rgb[0].at<uchar>(30, 30) << endl;
+	diferenca = falsecolor - infragram;
+
+	//cout << "Diferenca " << diferenca << endl;
+
+	cout << "Size Imagem " << imagem.size() << endl;
+	cout << "Size infragram  " << infragram.size() << endl;
+
+	/*cout << "Pixel imagem " << (int)imagem.at<uchar>(30, 30) << endl;
+	cout << "Pixel infragram " << (int)infragram.at<uchar>(30, 30) << endl;*/
+
+	Mat rgb[3], rgb2[3];
+	split(falsecolor, rgb);
+	split(infragram, rgb2);
+	cout << "imagem " << (int) rgb[2].at<uchar>(30, 30) << endl;
+	cout << "Infragram " << (int)rgb2[2].at<uchar>(30, 30) << endl;
+	//cout << "Verde False color " << (int)rgb[1].at<uchar>(30, 30) << endl;
+	//cout << "Azul False color " << (int)rgb[0].at<uchar>(30, 30) << endl;
 
 	//cout << imagem << endl;
 	//imshow("ndvi", ndvi);
