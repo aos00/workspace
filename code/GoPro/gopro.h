@@ -1,6 +1,7 @@
 /*
 *	GoPro Header File
 *	@Author: ANDERSON OLIVEIRA SOUSA.
+* 	@UNIVERSIDADE FEDERAL DE GOIAS - ENGENHARIA DE COMPUTACAO
 *	@Date: October, 2014.
 */
 
@@ -20,7 +21,7 @@ class GoPro
 		FILE *fp;
 		short PHOTO_ID;
 		
-		size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream);
+		//size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream); Obsoleto: usando funcao default do curl
 		
 	public:
 		

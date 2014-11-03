@@ -1,6 +1,7 @@
 /*
 *	Photo header File.
 *	@Author: ANDERSON OLIVEIRA SOUSA.
+* 	@UNIVERSIDADE FEDERAL DE GOIAS - ENGENHARIA DE COMPUTACAO
 *	@Date: October, 2014.
 */
 #include <stdio.h>

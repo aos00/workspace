@@ -1,6 +1,7 @@
 /*
 *	Photo Class Source File.
 *	@Author: ANDERSON OLIVEIRA SOUSA.
+* 	@UNIVERSIDADE FEDERAL DE GOIAS - ENGENHARIA DE COMPUTACAO
 *	@Date: October, 2014.
 */
 

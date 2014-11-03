@@ -1,6 +1,7 @@
 /*
 *	GoPro Class Source File.
-*	@Author: ANDERSON OLIVEIRA SOUSA.
+*	@Author: ANDERSON OLIVEIRA SOUSA
+* 	@UNIVERSIDADE FEDERAL DE GOIAS - ENGENHARIA DE COMPUTACAO
 *	@Date: October, 2014.
 */
 
@@ -8,9 +9,9 @@
 #include "gopro.h"
 
 const char * TAKE_PIC_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%01";
-//char * GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/GOPR1379.JPG";
-const char * GET_IMG_URL = "http://www.cse.buffalo.edu/~bina/presentations/mapreduceJan19-2010.pdf";
-char FILENAME[FILENAME_MAX] = "./GOPR1379.pdf";
+const char * GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/GOPR";
+//const char * GET_IMG_URL = "http://upload.wikimedia.org/wikipedia/commons/3/36/Hopetoun_falls.jpg";
+char FILENAME[FILENAME_MAX] = "./GOPR.jpg";
 
 using namespace std;
 
@@ -35,6 +36,7 @@ void GoPro::takePicture()
 	curl_easy_cleanup(curl);
 }
 
+/*Atualmente usa-se a funcao default
 size_t GoPro::write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
 	cout << "Size: " << size << endl;
@@ -45,6 +47,7 @@ size_t GoPro::write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
 	cout << "Written: " << written << endl;
 	return written;
 }
+* */
 
 void GoPro::getImage(short ID)
 {		
@@ -61,9 +64,9 @@ void GoPro::getImage(short ID)
 	curl = curl_easy_init();
 	assert(curl != NULL);
 	
-	fp = fopen(FILENAME, "wb");
+	fp = fopen(filename2.c_str(), "wb");
 	assert(fp != NULL);
-	curl_easy_setopt(curl, CURLOPT_URL, GET_IMG_URL);
+	curl_easy_setopt(curl, CURLOPT_URL, url2.c_str());
 	assert(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL) == CURLE_OK);
 	//assert(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &GoPro::write_data	) == CURLE_OK);
 	assert(curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp) == CURLE_OK);
