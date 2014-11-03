@@ -8,8 +8,9 @@
 #include "gopro.h"
 
 const char * TAKE_PIC_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%01";
-const char * GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/";
-const char * FILENAME = "IMAGES/GPR";
+//char * GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/GOPR1379.JPG";
+const char * GET_IMG_URL = "http://www.cse.buffalo.edu/~bina/presentations/mapreduceJan19-2010.pdf";
+char FILENAME[FILENAME_MAX] = "./GOPR1379.pdf";
 
 using namespace std;
 
@@ -36,38 +37,36 @@ void GoPro::takePicture()
 
 size_t GoPro::write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+	cout << "Size: " << size << endl;
+	cout << "nmemb: " << nmemb << endl;
+	cout << "size*nmemb: " << size*nmemb << endl;
 	size_t written;
 	written = fwrite(ptr, size, nmemb, stream);
+	cout << "Written: " << written << endl;
 	return written;
 }
 
-void GoPro::getImage(short id)
+void GoPro::getImage(short ID)
 {		
-	char char_id = (char) id;
+	string url(GET_IMG_URL);
+	char num[10];
+	sprintf(num, "%hu", ID);
+	string url2 = url + num + ".JPG";
+	cout << "url: " << url2 << endl;
 	
-	cout << "id: " << id << endl;
-	
-	char url[strlen(GET_IMG_URL)];
-	strcpy(url, GET_IMG_URL);
-	cout << "url: " << url << endl;
-	
-	strcat(url, &char_id);
-	cout << "url: " << url << endl;
-	
-	char filename[strlen(FILENAME)];
-	strcpy(filename, FILENAME);	
-	cout << "filename: " << filename << endl;
-	
-	strcat(filename, &char_id);
-	cout << "filename: " << filename << endl;
+	string filename(FILENAME);
+	string filename2 = filename + num + ".JPG";
+	cout << "filename: " << filename2 << endl;
 	
 	curl = curl_easy_init();
 	assert(curl != NULL);
 	
-	fp = fopen(filename, "wb");
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &GoPro::write_data);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+	fp = fopen(FILENAME, "wb");
+	assert(fp != NULL);
+	curl_easy_setopt(curl, CURLOPT_URL, GET_IMG_URL);
+	assert(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL) == CURLE_OK);
+	//assert(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &GoPro::write_data	) == CURLE_OK);
+	assert(curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp) == CURLE_OK);
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	res = curl_easy_perform(curl);
 	/* always cleanup */

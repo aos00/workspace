@@ -7,10 +7,10 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include <string.h>
 #include <assert.h>
 #include <iostream>
-#include <stdio.h>
+#include <string.h>
+#include <sstream>
 
 class GoPro
 {
