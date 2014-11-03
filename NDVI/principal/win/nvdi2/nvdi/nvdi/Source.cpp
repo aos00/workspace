@@ -41,29 +41,27 @@ Size frameSize;
 //			capture >> frame;
 //			
 //
-//			Mat rgb[3];
-//			split(frame, rgb);
+//			//Mat rgb[3];
+//			//split(frame, rgb);
 //
-//			imshow("Vermelho", rgb[2]);
-//			//imshow("Frame", frame);
+//			//imshow("Vermelho", rgb[2]);
+//
+//			
+//			imshow("Frame", frame);
 //
 //			//cout << frame << endl;
-//			
-//			frameSize = frame.size();
-//			
-//			//ndviCalculation(frame, ndvi); //Calculate NDVI
+//			//
+//			ndviCalculation(frame, ndvi); //Calculate NDVI
 //
 //			//imshow("NDVI", ndvi);
 //
-//			//convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
+//			convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
 //		
-//			//imshow("gray", gray);
+//			imshow("gray", gray);
 //
-//			//pseudoColor(gray, frame);
-//		
-//			//system("pause");				
+//			pseudoColor(gray, frame);			
 //
-//			//imshow("False color", frame);
+//			imshow("False color", frame);
 //				
 //			if (waitKey(10) >= 0)
 //				break;
@@ -88,6 +86,7 @@ void ndviCalculation(Mat& src, Mat& dst){
 	Mat rgb[3];
 	Mat soma(frameSize, CV_32F);
 	Mat subtracao(frameSize, CV_32F);
+	Mat divisao1(frameSize, CV_32F);
 
 	split(src, rgb);
 
@@ -98,6 +97,8 @@ void ndviCalculation(Mat& src, Mat& dst){
 	//dst = ((rgb[2] - rgb[0]) / (rgb[2] + rgb[0]));
 	//cout << "tipo" << dst.type() << endl;
 	////Adicionar e subtrair os canais
+	divide(rgb[0], 2, divisao1, CV_32FC1);
+
 	add(rgb[2], rgb[0], soma, noArray(), CV_32F);
 	////cout << "NVDI SOMA" << soma << endl;
 
@@ -232,7 +233,7 @@ void pseudoColor(Mat& src, Mat& dst){
 	//redIteration(ndviPseudoColored[2], src); //Remover
 	//blueIteration(ndviPseudoColored[0], src); //Remover
 
-	ndviPseudoColored[1] = 128 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
+	ndviPseudoColored[1] = 255 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
 
 	merge(ndviPseudoColored, 3, dst);
 	//cout << "Pseudo colored NDVI" << dst << endl;
@@ -671,60 +672,44 @@ void pseudoColor(Mat& src, Mat& dst){
 //------------------ Teste do NDVI com imagem do disco -------------------------
 int main(int argc, const char** argv){
 
-	Mat ndvi(frameSize, CV_32FC1);
-	Mat gray(frameSize, CV_8U);
-	Mat ndvi2(frameSize, CV_8U);
-	Mat falsecolor(frameSize, CV_8UC3);
-	Mat imagem, infragram, diferenca;
-	imagem = imread("teste1.png", 1);
-	infragram = imread("teste2.png", 1);
+	Mat localImage = imread("foto-ajustada.png", 1);
+	Mat infragramImage = imread("foto-ajustada-infragram-basic.png", 1);
+	Mat grayndvi(frameSize, CV_8UC1);	
 
-	if (!imagem.data)
+	frameSize = localImage.size();
+
+	Mat ndvi(frameSize, CV_32FC1);
+
+	if (!localImage.data)
 	{
-		cout << "Could not open or find the image" << std::endl;
+		cout << "Could not open local image" << std::endl;
+		system("pause");
 		return -1;
 	}
-	//CV_Assert(imagem != 0);
+	if (!infragramImage.data)
+	{
+		cout << "Could not open infragram image" << std::endl;
+		system("pause");
+		return -1;
+	}
 
-	frameSize = imagem.size();
+	
+	ndviCalculation(localImage, ndvi);
+	//cout << ndvi << endl;
+	convertToGrayScale(ndvi, grayndvi);
+	//cout << grayndvi << endl;
+	////cout << "Image type:" << infragramImage
+	//cout << "Frame size:" << frameSize << endl;
+	cout << "Local ndvi " << (int) grayndvi.at<uchar>(0,0) << endl;
+	cout << "Infragram ndvi " << (int)infragramImage.at<uchar>(0,0) << endl;
 
-	ndvi.convertTo(ndvi2, CV_8U);
-
-	ndviCalculation(imagem, ndvi);
-
-	cout << "ndvi " << ndvi.at<float>(30, 30) << endl;
-
-	convertToGrayScale(ndvi, gray);
-
-	cout << "Gray " << (int)gray.at<uchar>(30, 30) << endl;
-
-	pseudoColor(gray, falsecolor);
-
-	diferenca = falsecolor - infragram;
-
-	//cout << "Diferenca " << diferenca << endl;
-
-	cout << "Size Imagem " << imagem.size() << endl;
-	cout << "Size infragram  " << infragram.size() << endl;
-
-	/*cout << "Pixel imagem " << (int)imagem.at<uchar>(30, 30) << endl;
-	cout << "Pixel infragram " << (int)infragram.at<uchar>(30, 30) << endl;*/
-
-	Mat rgb[3], rgb2[3];
-	split(falsecolor, rgb);
-	split(infragram, rgb2);
-	cout << "imagem " << (int) rgb[2].at<uchar>(30, 30) << endl;
-	cout << "Infragram " << (int)rgb2[2].at<uchar>(30, 30) << endl;
-	//cout << "Verde False color " << (int)rgb[1].at<uchar>(30, 30) << endl;
-	//cout << "Azul False color " << (int)rgb[0].at<uchar>(30, 30) << endl;
-
-	//cout << imagem << endl;
-	//imshow("ndvi", ndvi);
-	//imshow("NDVI", ndvi2);
-	imshow("gray", gray);
-	imshow("False color", falsecolor);
-	imshow("imagem", imagem);
-
-	waitKey(0);
+	imshow("Gray ndvi", grayndvi);
+	waitKey(1);
+	imshow("Infragram", infragramImage);
+	//imshow("Original", localImage);
+	waitKey(1);
+	system("pause");
+	
+	destroyAllWindows();
 	return 0;
 }
