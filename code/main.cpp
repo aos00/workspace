@@ -5,11 +5,11 @@
 */
 
 #include <stdio.h>
-#include "gopro.h"
+#include "GoPro/gopro.h"
 
-int main(){
+int main(){ //obter ID inicial da foto
 
-GoPro camera;
+GoPro camera((short) 1);
 camera.takePicture();
 
 return 0;

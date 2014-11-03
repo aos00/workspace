@@ -3,6 +3,7 @@
 *	@Author: ANDERSON OLIVEIRA SOUSA.
 *	@Date: October, 2014.
 */
+#include <stdio.h>
 
 class Photo
 {
@@ -12,9 +13,11 @@ class Photo
 		int  latitude;
 		int longitude;
 		short altitude;
-		FILE data;
+		FILE *data;
 		
 	public:
-		Photo(short,int,int, *data_stream); //Constructor parameters: ID, latitude and longitude, file data.
-}
+		Photo(short,int,int); //Constructor parameters: ID, latitude and longitude.
+		//Photo(short,int,int, FILE*); //Constructor parameters: ID, latitude and longitude, file data.
+		//setData(FILE*);
+};
 
