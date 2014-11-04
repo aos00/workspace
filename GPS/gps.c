@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "assert.h"
@@ -5,11 +6,14 @@
 #include <errno.h>
 #include <math.h>
 
+using namespace std;
+
 static char *server = "localhost";
 static char *port = "2947";
 static char scr[128];
 
 struct gps_data_t GPS_DATA;
+
 
 int main(){
 

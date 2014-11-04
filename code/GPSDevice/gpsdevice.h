@@ -5,6 +5,12 @@
 *	@Date: October, 2014.
 */
 
+//#include <gps.h>
+#include <libgpsmm.h>
+#include <iostream>
+//#include <stdlib>
+
+
 
 class GPSDevice
 {
@@ -12,14 +18,17 @@ class GPSDevice
 		int latitude;
 		int longitude;
 		short altitude;
+		static char scr[128];
+		
+		gpsmm * gps_receiver;
 		
 	public:
-		void open_conn();
+		GPSDevice(const char*);
 		void read_data();
-		void wait_powering_on();
-		void update();
-		int getLatitude();
-		int getLongitude();
-		short getAltitude();
+		//void wait_powering_on();
+		//void update();
+		//int getLatitude();
+		//int getLongitude();
+		//short getAltitude();
 	
-}
+};
