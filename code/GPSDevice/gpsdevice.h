@@ -5,30 +5,32 @@
 *	@Date: October, 2014.
 */
 
-//#include <gps.h>
 #include <libgpsmm.h>
 #include <iostream>
-//#include <stdlib>
 
+struct target {
+	double latitude;
+	double longitude;
+};
 
 
 class GPSDevice
 {
 	private:
-		int latitude;
-		int longitude;
-		short altitude;
-		static char scr[128];
+	
+	/*Target points which define the earth surface*/
+		target ptA;
+		target ptB;
+		target ptC;
+		target ptD;
 		
 		gpsmm * gps_receiver;
 		
 	public:
 		GPSDevice(const char*);
+		void setTarget(target,target,target,target);
 		void read_data();
-		//void wait_powering_on();
-		//void update();
-		//int getLatitude();
-		//int getLongitude();
-		//short getAltitude();
+		void setStatus(int);
+		bool inSurface();
 	
 };

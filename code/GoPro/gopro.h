@@ -19,12 +19,13 @@ class GoPro
 		CURL *curl;
 		CURLcode res;
 		FILE *fp;
-		short PHOTO_ID;
+		
 		
 		//size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream); Obsoleto: usando funcao default do curl
 		
 	public:
 		
+		short PHOTO_ID;
 	
 		GoPro(short);
 		void takePicture(); //Bater uma foto
