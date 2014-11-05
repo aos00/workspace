@@ -5,6 +5,9 @@
 *	@Date: October, 2014.
 */
 
+#ifndef __GOPRO_HPP_INCLUDED__
+#define __GOPRO_HPP_INCLUDED__
+
 #include <photo.hpp>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -22,14 +25,15 @@ class GoPro
 
 		short getID();
 
-		Photo * setPhoto(char*);
-
 		//size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream); Obsoleto: usando funcao default do curl
 
 	public:	
 
 		GoPro(short);
 		void takePicture(); //Bater uma foto
-		const char* getImage(short); //Download da imagem localizada no servidor da camera a partir do id
-		const char* getImage(); //Download da ultima imagem fotografada
+		void takePicture(double, double, double); //Bater uma foto
+		Photo * getImage(short); //Download da imagem localizada no servidor da camera a partir do id
+		Photo * getImage(); //Download da ultima imagem fotografada
 };
+
+#endif

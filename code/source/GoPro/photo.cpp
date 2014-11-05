@@ -7,6 +7,11 @@
 
 #include "photo.hpp"
 
+Photo::Photo(const char * file_path, short ID) {
+	filepath = file_path;
+	id = ID; 
+}
+
 Photo::Photo(short id, int latitude, int longitude){
 	
 }

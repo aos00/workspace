@@ -12,7 +12,7 @@
 
 const char * TAKE_PIC_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%01";
 const string GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/GOPR";
-const string FILE_PATH = "/img/GOPR";
+const string IMAGES_PATH = "/home/pi/raspi_local_repo/code/img/GOPR";
 //const char * GET_IMG_URL = "http://upload.wikimedia.org/wikipedia/commons/3/36/Hopetoun_falls.jpg";
 
 using namespace std;
@@ -51,11 +51,10 @@ size_t GoPro::write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
 }
 * */
 
-const char * GoPro::getImage(){ return getImage(PHOTO_ID); }
+Photo * GoPro::getImage(){ return getImage(PHOTO_ID); }
 
-const char * GoPro::getImage(short ID)
+Photo * GoPro::getImage(short ID)
 {
-
 	char num[10];
 	sprintf(num, "%hu", ID);
 
@@ -63,7 +62,7 @@ const char * GoPro::getImage(short ID)
 	const char * url = url_tmp.c_str();
 	cout << "url: " << url << endl;
 
-	string fn_tmp = FILE_PATH + num + ".JPG";
+	string fn_tmp = IMAGES_PATH + num + ".JPG";
 	const char * filename = fn_tmp.c_str();
 	cout << "filename: " << filename << endl;
 
@@ -82,17 +81,14 @@ const char * GoPro::getImage(short ID)
 	curl_easy_cleanup(curl);
 	fclose(fp);
 	
-	return filename;
+	Photo pht(filename,ID);
+	
+	return &pht;
 
 }
 
 short GoPro::getID() { return PHOTO_ID; }
 
-Photo* GoPro::setPhoto(char* filename)
-{
-	//Photo pt1;
-	return NULL;
-}
 	
 
 

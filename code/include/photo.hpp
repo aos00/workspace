@@ -5,22 +5,21 @@
 *	@Date: October, 2014.
 */
 
-#ifndef __PHOTO_H_INCLUDED__
-#define __PHOTO_H_INCLUDED__
+#ifndef __PHOTO_HPP_INCLUDED__
+#define __PHOTO_HPP_INCLUDED__
 
 #include <stdio.h>
 
 class Photo
-{
-	private:
-		char *filename;
+{		
+	public:
+		const char *filepath;
 		short id;
 		int  latitude;
 		int longitude;
 		short altitude;
-		FILE *data;
 		
-	public:
+		Photo(const char*,short);
 		Photo(short,int,int); //Constructor parameters: ID, latitude and longitude.
 		//Photo(short,int,int, FILE*); //Constructor parameters: ID, latitude and longitude, file data.
 		//setData(FILE*);

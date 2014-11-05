@@ -8,9 +8,15 @@
 #include <libgpsmm.h>
 #include <iostream>
 
-struct target {
+struct coordinates {
 	double latitude;
 	double longitude;
+};
+
+struct photo_info {
+	coordinates coord;
+	double altitude;
+	char * date;
 };
 
 
@@ -19,16 +25,18 @@ class GPSDevice
 	private:
 	
 	/*Target points which define the earth surface*/
-		target ptA;
-		target ptB;
-		target ptC;
-		target ptD;
+		struct coordinates target_ptA;
+		struct coordinates target_ptB;
+		struct coordinates target_ptC;
+		struct coordinates target_ptD;
 		
 		gpsmm * gps_receiver;
 		
 	public:
+		struct gps_data_t * data;
+	
 		GPSDevice(const char*);
-		void setTarget(target,target,target,target);
+		void setTarget(coordinates,coordinates,coordinates,coordinates);
 		void read_data();
 		void setStatus(int);
 		bool inSurface();

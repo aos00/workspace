@@ -40,7 +40,7 @@ GPSDevice::GPSDevice(const char *address)
 
 void GPSDevice::read_data()
 {
-		struct gps_data_t * data;
+		
 		
 		if(gps_receiver->waiting(5000)){ //Return true if theres data ready for the client
 		

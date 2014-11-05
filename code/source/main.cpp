@@ -5,37 +5,38 @@
 *	@Date: October, 2014.
 */
 
-#include <pthread.h>
 #include <stdio.h>
 #include "gopro.hpp"
 #include "gpsdevice.hpp"
-
-
-#define NUM_SHOT_THREADS 10
+#include "photohandler.hpp"
+#include "photo.hpp" 
 
 using namespace std;
 
 const char * GPS_ADDRESS = "localhost";
-pthread_t shot;
-int thread_status;
 
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
+	Photo * foto;
+	
 
 	GoPro camera((short) 1378);
 
 	GPSDevice gps(GPS_ADDRESS);
 
-	for(;;){
+	PhotoHandler handler;
+	
+	while(gps.data->status != 1)
 		gps.read_data();
-
+	
 		if(gps.inSurface()){
 			camera.takePicture();
-			camera.getImage();
-		}
-		sleep(3);
-	}
+			foto = camera.getImage();
+			handler.stampCoordinates(foto,gps.data->fix.latitude, gps.data->fix.longitude);
+ 		}
+		//sleep(3);
+	
 
 return 0;
 
