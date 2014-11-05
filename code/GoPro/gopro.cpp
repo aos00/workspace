@@ -34,6 +34,7 @@ void GoPro::takePicture()
 	      fprintf(stderr, "ERRO - takePicture(): curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
 	curl_easy_cleanup(curl);
+	PHOTO_ID++;
 }
 
 /*Atualmente usa-se a funcao default
@@ -48,6 +49,8 @@ size_t GoPro::write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
 	return written;
 }
 * */
+
+void GoPro::getImage(){ getImage(PHOTO_ID); }
 
 void GoPro::getImage(short ID)
 {		
@@ -75,7 +78,10 @@ void GoPro::getImage(short ID)
 	/* always cleanup */
 	curl_easy_cleanup(curl);
 	fclose(fp);
+	
 
 }
+
+short GoPro::getID() { return PHOTO_ID; }
 
 

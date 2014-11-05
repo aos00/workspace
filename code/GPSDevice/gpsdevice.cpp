@@ -40,23 +40,21 @@ GPSDevice::GPSDevice(const char *address)
 
 void GPSDevice::read_data()
 {
-	for(;;){
 		struct gps_data_t * data;
 		
-		if(!gps_receiver->waiting(500))
-			continue;
+		if(gps_receiver->waiting(5000)){ //Return true if theres data ready for the client
 		
-		if((data = gps_receiver->read()) == NULL){
-			cerr << "Erro ao ler os dados do gps"  << endl;
-			//return 1;
-		} else {
-			cout << "Status: " << data->status << endl;
-			cout << "Latitude: " << data->fix.latitude << ", Longitude: " << data->fix.longitude << endl;
-			//cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
-			latitude = data->fix.latitude;
-			longitude = data->fix.longitude;
-		}
+			if((data = gps_receiver->read()) == NULL){
+				cerr << "Erro ao ler os dados do gps"  << endl;
+				//return 1;
+			} else {
+				cout << "Status: " << data->status << endl;
+				cout << "Latitude: " << data->fix.latitude << ", Longitude: " << data->fix.longitude << endl;
+				//cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
+			}
 	}
 }
+
+bool GPSDevice::inSurface(){return true;}
 
 

@@ -5,7 +5,7 @@
 *	@Date: October, 2014.
 */
 
-#include <thread>
+#include <pthread.h>
 #include <stdio.h>
 #include "GoPro/gopro.h"
 #include "GPSDevice/gpsdevice.h"
@@ -16,29 +16,25 @@
 using namespace std;
 
 const char * GPS_ADDRESS = "localhost";
+pthread_t shot;
+int thread_status;
+
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 
 	GoPro camera((short) 1378);
-	
-	
-	//camera.takePicture();
-	//sleep(1);
-	//camera.getImage(1386);
 
-	GPSDevice gps(GPS_ADDRESS);
-	//gps.connection_open();
-	
+	GPSDevice gps(GPS_ADDRESS);	
 	
 	for(;;){
 		gps.read_data();
 		
 		if(gps.inSurface()){
-			std::thread shot(camera.takePicture());
-			std::thread getImage(camera.getImage(++camera.PHOTO_ID));
+			camera.takePicture();
+			camera.getImage();
 		}
-		
+		sleep(3);
 	}
 
 return 0;
