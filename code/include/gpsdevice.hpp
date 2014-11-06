@@ -10,6 +10,7 @@
 
 #include <libgpsmm.h>
 #include <iostream>
+#include <GeographicLib/UTMUPS.hpp>
 
 struct coordinates {
 	double latitude;
@@ -20,6 +21,11 @@ struct photo_info {
 	coordinates coord;
 	double altitude;
 	char * date;
+};
+
+struct point {
+	double x;
+	double y;
 };
 
 
@@ -34,6 +40,8 @@ class GPSDevice
 		struct coordinates target_ptD;
 		
 		gpsmm * gps_receiver;
+		
+		void convertCoordinates(coordinates); //Convert from latitude/longitude to UTM
 		
 	public:
 		struct gps_data_t * data;

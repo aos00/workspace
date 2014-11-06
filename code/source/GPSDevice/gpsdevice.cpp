@@ -64,14 +64,42 @@ void GPSDevice::read_data()
 				//return 1;
 			} else{
 				#ifdef __DEBUG__
-				printf("Status: %i\n",data->status);
-				printf("Latitude: %f, Longitude: %f \n",ata->fix.latitude, data->fix.longitude);
-				//cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
+				if(!(isnan(data->fix.latitude) || isnan(data->fix.data))){
+					printf("Status: %i\n",data->status);
+					printf("Latitude: %f, Longitude: %f \n",data->fix.latitude, data->fix.longitude);
+					//cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
+				}else{
+					printf("Latitude or Longitude is NaN");
+				}
 				#endif
 			}
 	}
 }
 
 bool GPSDevice::inSurface(){return true;}
+
+void GPSDevice::convertCoordinates(coordinates coord)
+{
+	try {    
+      
+      int zone;
+      bool northp;
+      double x, y;
+      UTMUPS::Forward(coord.latitude, coord.longitude, zone, northp, x, y);
+      string zonestr = UTMUPS::EncodeZone(zone, northp);
+      
+      #ifdef __DEBUG__
+      printf("Zone: %s ; Latitude: %f ; Longitude: %f", zonestr, x ,y);
+      //cout << fixed << setprecision(2) << zonestr << " " << x << " " << y << "\n";
+      #endif
+      
+    }catch (const exception& e) {
+    cerr << "Caught exception: " << e.what() << "\n";
+    return 1;
+  }
+	
+	
+	
+}
 
 
