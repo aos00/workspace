@@ -5,25 +5,29 @@
 *	@Date: October, 2014.
 */
 
+#define __DEBUG__
+
 #include <stdio.h>
 #include "gopro.hpp"
 #include "gpsdevice.hpp"
 #include "photohandler.hpp"
 #include "photo.hpp" 
 
+
+#define GPS_PORT 2947
+
 using namespace std;
 
 const char * GPS_ADDRESS = "localhost";
-
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	Photo * foto;
 	
 
-	GoPro camera((short) 1378);
+	GoPro camera((short) 1404);
 
-	GPSDevice gps(GPS_ADDRESS);
+	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
 	PhotoHandler handler;
 	

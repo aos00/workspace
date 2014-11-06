@@ -15,12 +15,12 @@ void PhotoHandler::stampCoordinates(Photo *ph, double latitude, double longitude
 	char longt[10];
 	sprintf(lat, "%f", latitude);
 	sprintf(longt, "%f", longitude);
-	string label = string("IMAGE INFO: Latitude:") + lat + string(", Longitude: ") + longt;
+	string label = string("PHOTO INFO: Latitude: ") + lat + string(", Longitude: ") + longt;
 	
 	image = imread(ph->filepath, CV_LOAD_IMAGE_COLOR);
 	
 	if(image.data){
-		putText(image, label, Point(30,30), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,0,255)); 
+		putText(image, label, Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255), 4, 5, false); 
 		imshow("Foto", image);
 	}else{
 		cout << "Erro ao carregar a imagem " << endl;

@@ -24,33 +24,50 @@
  *	@Date: October, 2014.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "gpsdevice.hpp"
 
 using namespace std;
 
 
-GPSDevice::GPSDevice(const char *address)
+GPSDevice::GPSDevice(const char *address, const int port)
 {
+	printf("Starting GPS...\nChecking if processor is available...\n");
+	if(system(NULL)){
+		printf("Processor available! Executing commmand to gpsd start\n");
+		if(system("sudo gpsd /dev/ttyAMA0 -F /var/run/gpsd.sock") == 0){
+			printf("GPSD running...");
+		}else{
+			perror("Error starting GPSD!\n");
+		}
+	}else{ 
+		perror("Processor not available!\n");
+	}
+	
 	gps_receiver = new gpsmm(address, DEFAULT_GPSD_PORT);
 	
+	printf("Checking if GPSD is running:\n");
 	if (gps_receiver->stream(WATCH_ENABLE|WATCH_JSON) == NULL)
-        cerr << "GPSD nao esta executando!" << endl;	
+        perror("GPSD nao esta executando!\n");
+    else
+		printf("GPS receiver is running!\n");
 }
 
 
 void GPSDevice::read_data()
-{
-		
-		
+{		
 		if(gps_receiver->waiting(5000)){ //Return true if theres data ready for the client
 		
 			if((data = gps_receiver->read()) == NULL){
-				cerr << "Erro ao ler os dados do gps"  << endl;
+				printf("Erro ao ler os dados do gps\n");
 				//return 1;
-			} else {
-				cout << "Status: " << data->status << endl;
-				cout << "Latitude: " << data->fix.latitude << ", Longitude: " << data->fix.longitude << endl;
+			} else{
+				#ifdef __DEBUG__
+				printf("Status: %i\n",data->status);
+				printf("Latitude: %f, Longitude: %f \n",ata->fix.latitude, data->fix.longitude);
 				//cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
+				#endif
 			}
 	}
 }

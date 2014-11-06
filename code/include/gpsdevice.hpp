@@ -5,6 +5,9 @@
 *	@Date: October, 2014.
 */
 
+#ifndef __GPSDEVICE_HPP_INCLUDED__
+#define __GPSDEVICE_HPP_INCLUDED__
+
 #include <libgpsmm.h>
 #include <iostream>
 
@@ -35,10 +38,13 @@ class GPSDevice
 	public:
 		struct gps_data_t * data;
 	
-		GPSDevice(const char*);
+		GPSDevice(const char*, const int);
 		void setTarget(coordinates,coordinates,coordinates,coordinates);
 		void read_data();
 		void setStatus(int);
 		bool inSurface();
 	
 };
+
+
+#endif
