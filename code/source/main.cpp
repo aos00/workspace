@@ -24,7 +24,6 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	Photo * foto;
 	
-
 	GoPro camera((short) 1404);
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);

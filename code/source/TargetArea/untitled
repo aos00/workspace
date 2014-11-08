@@ -1,0 +1,7 @@
+
+#include "targetarea.hpp"
+
+
+TargetArea::TargetArea(const char *) {
+	
+}

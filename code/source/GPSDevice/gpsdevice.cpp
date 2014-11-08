@@ -29,7 +29,7 @@
 #include "gpsdevice.hpp"
 
 using namespace std;
-
+using namespace GeographicLib;
 
 GPSDevice::GPSDevice(const char *address, const int port)
 {
@@ -52,6 +52,9 @@ GPSDevice::GPSDevice(const char *address, const int port)
         perror("GPSD nao esta executando!\n");
     else
 		printf("GPS receiver is running!\n");
+		
+	printf("...\nChecking if processor is available...\n");
+		
 }
 
 
@@ -94,12 +97,9 @@ void GPSDevice::convertCoordinates(coordinates coord)
       #endif
       
     }catch (const exception& e) {
-    cerr << "Caught exception: " << e.what() << "\n";
-    return 1;
-  }
-	
-	
-	
+    
+		//cerr << "Caught exception: " << e.what() << "\n";
+	}	
 }
 
 
