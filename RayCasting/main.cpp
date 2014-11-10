@@ -9,15 +9,15 @@
 using namespace std;
 
 const string filepath = "/home/pi/raspi_local_repo/RayCasting/";
-vector<float> x_vert;
-vector<float> y_vert;
-short n_vertices = 0;
+vector<double> x_vert;
+vector<double> y_vert;
+int n_vertices = 0;
 
 #ifdef __DEBUG__
-void printVector(vector<float>&);
+void printVector(vector<double>&);
 #endif
 
-int inpoly(int, vector<float>&, vector<float>&, float, float);
+int inpoly(int, vector<double>&, vector<double>&, double, double);
 
 /* Read file with the area points and load them to memory */
 int main(void) {
@@ -46,8 +46,9 @@ int main(void) {
 		printVector(x_vert);
 		printf("\nY vertices: \n");
 		printVector(y_vert);
-
-		printf("Point(%f,%f) is in area? %i",0,0,inpoly(n_vertices,x_vert, y_vert, 0.0, 0.0));
+		double x = 10.00001;
+		double y = 10.00001;
+		printf("Point(%f,%f) is in area? %i\n", x, y, inpoly(n_vertices, x_vert, y_vert, x, y));
 		#endif
 
 		areapoints.close();
@@ -61,9 +62,9 @@ int main(void) {
 
 #ifdef __DEBUG__
 
-void printVector(vector<float> &src) {
+void printVector(vector<double> &src) {
 
-	for(vector<float>::iterator it = src.begin(); it != src.end(); it++)
+	for(vector<double>::iterator it = src.begin(); it != src.end(); it++)
 		printf("\n%f",*it);
 }
 
@@ -74,7 +75,7 @@ void printVector(vector<float> &src) {
  * Copyright (c) 1970-2003, Wm. Randolph Franklin
 */
 
-int inpoly(int nvert, vector<float> &vertx, vector<float> &verty, float testx, float testy)
+int inpoly(int nvert, vector<double> &vertx, vector<double> &verty, double testx, double testy)
 {
   int i, j, c = 0;
   for (i = 0, j = nvert-1; i < nvert; j = i++) {
