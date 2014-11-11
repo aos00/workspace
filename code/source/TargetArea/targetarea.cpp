@@ -8,23 +8,19 @@
 
 using namespace std;
 
-const string filepath = "/home/pi/raspi_local_repo/RayCasting/";
-
-#ifdef __DEBUG__
 void printVector(vector<double>&);
-#endif
 
 /* Read file with the area points and load them to memory */
-TargetArea::TargetArea(const char*) {
+TargetArea::TargetArea(const string &file_path) {
 	n_vertices = 0;
 	string coordinate;
-	string full_file_path = filepath + string("areapoints");
+	//string full_file_path = filepath + string("areapoints");
 
 	#ifdef __DEBUG__
-	printf("TargetArea(): Filepath: %s \n full_file_path: %s\n",filepath.c_str(), full_file_path.c_str());
+	printf("TargetArea(): Filepath: %s",file_path.c_str());
 	#endif
 
-	ifstream areapoints(full_file_path.c_str());
+	ifstream areapoints(file_path.c_str());
 
 	if(areapoints.is_open()) {
 		size_t delmpos;

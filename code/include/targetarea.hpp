@@ -13,7 +13,7 @@ class TargetArea
 		int n_vertices;	
 		
 	public:
-		TargetArea(const char*);
+		TargetArea(const string&);
 		int inpoly(int, vector<double>&, vector<double>&, double, double);
 		void printVector(vector<double> &src);
 			

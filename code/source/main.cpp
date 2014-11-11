@@ -16,6 +16,7 @@
 
 
 #define GPS_PORT 2947
+const string filepath = "/home/pi/raspi_local_repo/code/areapoints";
 
 using namespace std;
 
@@ -31,10 +32,12 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	PhotoHandler handler;
 	
+	TargetArea area(filepath);
+	
 	while(gps.data->status != 1)
 		gps.read_data();
 	
-		if(gps.inSurface()){
+		if(area.inpoly(){
 			camera.takePicture();
 			foto = camera.getImage();
 			handler.stampCoordinates(foto,gps.data->fix.latitude, gps.data->fix.longitude);

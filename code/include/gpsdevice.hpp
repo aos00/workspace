@@ -41,7 +41,7 @@ class GPSDevice
 		
 		gpsmm * gps_receiver;
 		
-		void convertCoordinates(coordinates); //Convert from latitude/longitude to UTM
+		void convertCoordinates(coordinates&); //Convert from latitude/longitude to UTM
 		
 	public:
 		struct gps_data_t * data;
