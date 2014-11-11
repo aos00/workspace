@@ -11,7 +11,8 @@
 #include "gopro.hpp"
 #include "gpsdevice.hpp"
 #include "photohandler.hpp"
-#include "photo.hpp" 
+#include "photo.hpp"
+#include "targetarea.hpp"
 
 
 #define GPS_PORT 2947
@@ -38,10 +39,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 			foto = camera.getImage();
 			handler.stampCoordinates(foto,gps.data->fix.latitude, gps.data->fix.longitude);
  		}
-		//sleep(3);
-	
-
-return 0;
-
-
+ 		
+		//sleep(3);	
+	return 0;
 }

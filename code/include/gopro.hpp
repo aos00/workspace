@@ -22,6 +22,7 @@ class GoPro
 		CURLcode res;
 		FILE *fp;
 		short PHOTO_ID;
+		Photo pht;
 
 		short getID();
 
