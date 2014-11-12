@@ -16,7 +16,7 @@
 
 
 #define GPS_PORT 2947
-const string filepath = "/home/pi/raspi_local_repo/code/areapoints";
+const string filepath = "/home/pi/raspi_local_repo/code/quadra";
 
 using namespace std;
 
@@ -31,9 +31,12 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 	PhotoHandler handler;
 
 	TargetArea area(filepath);
+
+	camera.setCameraMode(PHOTO_MODE);
+
     int m=0;
 	while(1){
-	    if(m>5)
+	    if(m>50)
             break;
 		if(gps.read_data()){
 			if(area.inTarget(gps.current_location.coordinate)){
@@ -41,27 +44,12 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 				cout << "take picture" << endl;
 				camera.takePicture(&gps.current_location);
 				m++;
-				printf(" aqui4!\n" );
+
+
 			}
 		}
 	}
 	camera.writePhotoRecords();
-	/*
 
-	while(gps.data->status != 1){
-		gps.read_data();
-	}
-	*
-	*
-	*/
-	/*
-		if(1){
-			camera.takePicture();
-			foto = camera.getImage();
-			handler.stampCoordinates(foto,gps.data->fix.latitude, gps.data->fix.longitude);
- 		}
- 	*/
-
-		//sleep(3);
 	return 0;
 }

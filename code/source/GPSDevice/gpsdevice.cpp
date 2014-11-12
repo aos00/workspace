@@ -36,43 +36,42 @@ using namespace std;
 
 GPSDevice::GPSDevice(const char *address, const int port)
 {
-	printf("Starting GPS...\nChecking if processor is available...\n");
+	printf("##GPSDevice: Starting GPS...\nChecking if processor is available...\n");
 	if(system(NULL)){
-		printf("Processor available! Executing commmand to gpsd start\n");
+		printf("##GPSDevice: Processor available! Executing commmand to gpsd start\n");
 		if(system("sudo gpsd /dev/ttyAMA0 -F /var/run/gpsd.sock") == 0){
-			printf("GPSD Daemon started...");
+			printf("##GPSDevice: GPSD Daemon started...");
 		}else{
-			perror("Error starting GPSD!\n");
+			perror("##GPSDevice: Error starting GPSD!\n");
 		}
 	}else{
-		perror("Processor not available!\n");
+		perror("##GPSDevice: Processor not available!\n");
 	}
 
 	gps_receiver = new gpsmm(address, DEFAULT_GPSD_PORT);
 
-	printf("Checking if data is available:\n");
+	printf("##GPSDevice: Checking if data is available:\n");
 	if (gps_receiver->stream(WATCH_ENABLE|WATCH_JSON) == NULL)
-        perror("GPSD daemon is not running!\n");
+        perror("##GPSDevice: GPSD daemon is not running!\n");
     else
-		printf("GPSD daemon is running!\n");
+		printf("##GPSDevice: GPSD daemon is running!\n");
 }
 
 
 int GPSDevice::read_data()
 {
 	if(!gps_receiver->waiting(5000000)){
-		//gps_clear_fix();
 		#ifdef __DEBUG__
-		printf(" No data available to the client, is the gps module connected to UART?\n" );
+		printf("##GPSDevice readd_data(): No data available to the client, is the gps module connected to UART?\n" );
 		#endif
 		return 0;
 	}
 
 	if((data = gps_receiver->read()) == NULL){
 		#ifdef __DEBUG__
-		printf("Erro ao ler os dados do gps\n");
-		printf("3Status: %i\n",data->status);
-		printf("3Mode: %i\n",data->fix.mode);
+		printf("##GPSDevice readd_data(): Erro ao ler os dados do gps\n");
+		printf("##GPSDevice readd_data(): Status: %i\n",data->status);
+		printf("##GPSDevice readd_data() 3Mode: %i\n",data->fix.mode);
 		#endif
 		return 0;
 	}
@@ -84,15 +83,15 @@ int GPSDevice::read_data()
         current_location.coordinate.longitude = data->fix.longitude;
 
 		#ifdef __DEBUG__
-		printf("4Status: %i\n",data->status);
-		printf("4Mode: %i\n",data->fix.mode);
-		printf("Latitude: %f, Longitude: %f, Altitude: %f \n",data->fix.latitude, data->fix.longitude, data->fix.altitude);
-		cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
+		printf("##GPSDevice readd_data(): Status: %i\n",data->status);
+		printf("##GPSDevice readd_data(): Mode: %i\n",data->fix.mode);
+		printf("##GPSDevice readd_data(): Latitude: %f, Longitude: %f, Altitude: %f \n",data->fix.latitude, data->fix.longitude, data->fix.altitude);
+		cout << "##GPSDevice readd_data() Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
 		#endif
 
 		return 1;
 	}else{
-		printf("Latitude or Longitude is NaN\n");
+		printf("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
 		return 0;
 	}
 }

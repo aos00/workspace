@@ -7,8 +7,9 @@
 class PhotoHandler
 {
 	public:
-		void stampCoordinates(Photo *, double, double);
-	
+        PhotoHandler();
+		void stampCoordinates(const Photo&);
+
 };
 
 #endif

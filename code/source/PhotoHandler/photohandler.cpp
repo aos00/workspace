@@ -7,25 +7,27 @@
 using namespace cv;
 using namespace std;
 
-void PhotoHandler::stampCoordinates(Photo *ph, double latitude, double longitude)
+void PhotoHandler::stampCoordinates(const Photo &ph)
 {
-	
+
 	Mat image;
 	char lat[10];
 	char longt[10];
-	sprintf(lat, "%f", latitude);
-	sprintf(longt, "%f", longitude);
+	sprintf(lat, "%f", ph.loc.coordinate.latitude);
+	sprintf(longt, "%f", ph.loc.coordinate.longitude);
 	string label = string("PHOTO INFO: Latitude: ") + lat + string(", Longitude: ") + longt;
-	
-	image = imread(ph->filepath, CV_LOAD_IMAGE_COLOR);
-	
+
+	image = imread(ph.filepath, CV_LOAD_IMAGE_COLOR);
+
 	if(image.data){
-		putText(image, label, Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255), 4, 5, false); 
+		putText(image, label, Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255), 4, 5, false);
 		imshow("Foto", image);
 	}else{
 		cout << "Erro ao carregar a imagem " << endl;
 	}
-	
-	waitKey(0);	
-	
+
+	waitKey(0);
+
 }
+
+PhotoHandler::PhotoHandler(){}

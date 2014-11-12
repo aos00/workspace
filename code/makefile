@@ -19,7 +19,7 @@ gopro.o: ./source/GoPro/gopro.cpp ./include/gopro.hpp ./include/common.hpp
 photo.o: ./source/GoPro/photo.cpp ./include/photo.hpp ./include/common.hpp
 	$(CC) $(CCFLAGS) -c ./source/GoPro/photo.cpp
 
-photohandler.o: ./source/PhotoHandler/photohandler.cpp ./include/photohandler.hpp
+photohandler.o: ./source/PhotoHandler/photohandler.cpp ./include/photohandler.hpp ./include/photo.hpp
 	$(CC) $(CCFLAGS) -c ./source/PhotoHandler/photohandler.cpp
 
 targetarea.o: ./source/TargetArea/targetarea.cpp ./include/targetarea.hpp ./include/common.hpp

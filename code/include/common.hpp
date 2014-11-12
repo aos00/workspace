@@ -3,6 +3,10 @@
 
 #include <string>
 
+#define VIDEO_MODE 0
+#define PHOTO_MODE 1
+#define BURST_MODE 2
+
 using namespace std;
 
 struct coordinates {

@@ -17,6 +17,9 @@
 
 
 const char * TAKE_PIC_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%01";
+const char * PHOTO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%01";
+const char * VIDEO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%00";
+const char * BURST_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%02";
 const string GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/GOPR";
 const string IMAGES_PATH = "/home/pi/raspi_local_repo/code/img/GOPR";
 //const char * GET_IMG_URL = "http://upload.wikimedia.org/wikipedia/commons/3/36/Hopetoun_falls.jpg";
@@ -30,15 +33,13 @@ GoPro::GoPro(short id)
 
 void GoPro::takePicture(const location *loc)
 {
-
-    #ifdef __HAS_CAMERA__
 	curl = curl_easy_init();
 	assert(curl != NULL);
 
 	if(curl_easy_setopt(curl, CURLOPT_URL, TAKE_PIC_URL) !=  CURLE_OK) perror("Take picture: curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L) != CURLE_OK) perror("takePicture: curl set write function opt error !");
 
-	#ifdef __DEBUG__d
+	#ifdef __DEBUG__
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	#endif
 
@@ -52,10 +53,10 @@ void GoPro::takePicture(const location *loc)
 
 	curl_easy_cleanup(curl);
 
-	#endif
-
-    cout << " aqui!" << endl;
-	photos.push_back(Photo(PHOTO_ID, loc, false));
+	char num[10];
+	sprintf(num, "%hu", PHOTO_ID);
+    string filepath = IMAGES_PATH + num;
+	photos.push_back(Photo(PHOTO_ID, loc, filepath, false));
 
 	PHOTO_ID++;
 }
@@ -128,4 +129,49 @@ bool GoPro::writePhotoRecords(){
     photoInfo.close();
     return true;
 
+}
+
+bool GoPro::setCameraMode(const short mode){
+
+    #ifdef __DEBUG__
+    printf("Setting camera mode to %i", mode);
+    #endif
+
+    curl = curl_easy_init();
+	assert(curl != NULL);
+
+	int status = -1;
+
+	if(mode == VIDEO_MODE){
+        status = curl_easy_setopt(curl, CURLOPT_URL, VIDEO_MODE_URL);
+    }else if(mode == PHOTO_MODE){
+         status = curl_easy_setopt(curl, CURLOPT_URL, PHOTO_MODE_URL);
+    }else if(mode == BURST_MODE){
+        status = curl_easy_setopt(curl, CURLOPT_URL, BURST_MODE_URL);
+    }else{
+        perror("set camera mode: mode unrecognized!");
+        return -1;
+    }
+
+    if(status != CURLE_OK){
+        perror("set camera mode: curl set url opt error");
+        return -1;
+    }
+
+	if(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L) != CURLE_OK) perror("set camera mode: curl set write function opt error !");
+
+	#ifdef __DEBUG__
+	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+	#endif
+
+	res = curl_easy_perform(curl);
+
+	if(res != CURLE_OK){
+
+	      fprintf(stderr, "ERRO - set camera mode(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+	}
+	//ERRO numero 7 quando o raspi nao esta conectado no GoPro (Network unreachable)
+
+	curl_easy_cleanup(curl);
+	return 1;
 }

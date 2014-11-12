@@ -15,6 +15,8 @@
 #include <curl/easy.h>
 #include "common.hpp"
 
+
+
 using namespace std;
 
 class GoPro
@@ -28,13 +30,13 @@ class GoPro
 		short getID();
 
 	public:
-
-		GoPro(short);
+		GoPro(const short);
 		void takePicture(); //Bater uma foto
 		void takePicture(const location*); //Bater uma foto
 		Photo * downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
 		Photo * downloadImage(); //Download da ultima imagem fotografada
         bool writePhotoRecords();
+        bool setCameraMode(const short);
 };
 
 #endif

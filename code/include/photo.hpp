@@ -17,12 +17,12 @@ using namespace std;
 class Photo
 {
 	public:
-		const char *filepath;
+		string filepath;
 		short id;
 		struct location loc;
 		bool downloaded;
 
-		Photo(const short,const location*,bool);
+		Photo(const short,const location*,string,bool);
 };
 
 #endif
