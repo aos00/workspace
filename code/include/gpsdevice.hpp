@@ -15,17 +15,20 @@
 
 class GPSDevice
 {
-	private:			
+	private:
 		gpsmm * gps_receiver;
-		
-		
+
+
 	public:
-		struct gps_data_t * data;	
-		GPSDevice(const char*, const int);
-		int read_data();		
-		struct coordinates current_coord;
+		struct gps_data_t * data;
+		struct location current_location;
 		char scr[100];
-	
+
+		GPSDevice(const char*, const int);
+		void setLocation();
+		int read_data();
+
+
 };
 
 

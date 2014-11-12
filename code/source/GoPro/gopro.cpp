@@ -12,6 +12,7 @@
 #include "gopro.hpp"
 
 
+
 const char * TAKE_PIC_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%01";
 const string GET_IMG_URL = "10.5.5.9:8080/DCIM/100GOPRO/GOPR";
 const string IMAGES_PATH = "/home/pi/raspi_local_repo/code/img/GOPR";
@@ -24,15 +25,15 @@ GoPro::GoPro(short id)
 	PHOTO_ID = id;
 }
 
-void GoPro::takePicture()
+void GoPro::takePicture(const location *loc)
 {
 	curl = curl_easy_init();
 	assert(curl != NULL);
 
 	if(curl_easy_setopt(curl, CURLOPT_URL, TAKE_PIC_URL) !=  CURLE_OK) perror("Take picture: curl set url opt error !");
-	if(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L) != CURLE_OK) perror("getImage: curl set write function opt error !");
+	if(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L) != CURLE_OK) perror("takePicture: curl set write function opt error !");
 
-	#ifdef __DEBUG__
+	#ifdef __DEBUG__d
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	#endif
 
@@ -45,12 +46,15 @@ void GoPro::takePicture()
 	//ERRO numero 7 quando o raspi nao esta conectado no GoPro (Network unreachable)
 
 	curl_easy_cleanup(curl);
+
+	photos.push_back(Photo(PHOTO_ID, loc, false))
+
 	PHOTO_ID++;
 }
 
-Photo * GoPro::getImage(){ return getImage(PHOTO_ID); }
+Photo * GoPro::downloadImage(){ return downloadImage(PHOTO_ID); }
 
-Photo * GoPro::getImage(short ID)
+Photo * GoPro::downloadImage(short ID)
 {
 	char num[10];
 	sprintf(num, "%hu", ID);
@@ -61,21 +65,21 @@ Photo * GoPro::getImage(short ID)
 	string fn_tmp = IMAGES_PATH + num + ".JPG";
 	const char * filename = fn_tmp.c_str();
 
-	#ifdef __DEBUG__ 
+	#ifdef __DEBUG__
 	printf("url: %s\n", url);
 	printf("filename: %s\n", filename);
 	#endif
 
 	curl = curl_easy_init();
-	if(curl == NULL) perror("getImage: Curl initialization error !");
+	if(curl == NULL) perror("downloadImage: Curl initialization error !");
 
 	fp = fopen(filename, "wb");
-	if(fp == NULL) perror("getImage: open file error !");
+	if(fp == NULL) perror("downloadImage: open file error !");
 
-	if(curl_easy_setopt(curl, CURLOPT_URL, url) !=  CURLE_OK) perror("getImage: curl set url opt error !");
-	if(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL) != CURLE_OK) perror("getImage: curl set write function opt error !");
-	if(curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp) != CURLE_OK) perror("getImage: curl set write data opt error !");
-	if(curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L) != CURLE_OK) perror("getImage: curl set fail error opt error !");
+	if(curl_easy_setopt(curl, CURLOPT_URL, url) !=  CURLE_OK) perror("downloadImage: curl set url opt error !");
+	if(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL) != CURLE_OK) perror("downloadImage: curl set write function opt error !");
+	if(curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp) != CURLE_OK) perror("downloadImage: curl set write data opt error !");
+	if(curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L) != CURLE_OK) perror("downloadImage: curl set fail error opt error !");
 
 	#ifdef __DEBUG__
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -85,17 +89,14 @@ Photo * GoPro::getImage(short ID)
 
 	if(res != CURLE_OK){
 
-	      fprintf(stderr, "ERRO - getImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+	      fprintf(stderr, "ERRO - downloadImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
 	}
 	//Erro numero 22 quando nao foi encontrado o arquivo no servidor web da gopro
 
 	curl_easy_cleanup(curl);
 	fclose(fp);
 
-	photos.push_back(Photo(filename,ID));
-
 	return NULL;
-
 }
 
 short GoPro::getID() { return PHOTO_ID; }

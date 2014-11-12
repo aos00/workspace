@@ -9,21 +9,20 @@
 #define __PHOTO_HPP_INCLUDED__
 
 #include <stdio.h>
+#include <string>
+#include "common.hpp"
+
+using namespace std;
 
 class Photo
-{		
+{
 	public:
 		const char *filepath;
 		short id;
-		int  latitude;
-		int longitude;
-		short altitude;
-		
-		Photo();
-		Photo(const char*,short);
-		Photo(short,int,int); //Constructor parameters: ID, latitude and longitude.
-		//Photo(short,int,int, FILE*); //Constructor parameters: ID, latitude and longitude, file data.
-		//setData(FILE*);
+		struct location loc;
+		bool downloaded;
+
+		Photo(const short,const location*,bool);
 };
 
 #endif

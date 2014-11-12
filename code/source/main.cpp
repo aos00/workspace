@@ -25,29 +25,30 @@ const char * GPS_ADDRESS = "localhost";
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	Photo * foto;
-	
-	//GoPro camera((short) 1404);
+
+	GoPro camera((short) 1404);
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
 	PhotoHandler handler;
-	
+
 	TargetArea area(filepath);
-	
+
 	while(1){
 		if(gps.read_data()){
-			if(area.inTarget(gps.current_coord)){
+			if(area.inTarget(gps.current_location.coordinate)){
 				cout << "take picture" << endl;
+				camera.takePicture(&gps.current_location);
 			}
 		}
 	}
 	/*
-	
+
 	while(gps.data->status != 1){
 		gps.read_data();
 	}
-	* 
-	* 
+	*
+	*
 	*/
 	/*
 		if(1){
@@ -56,7 +57,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 			handler.stampCoordinates(foto,gps.data->fix.latitude, gps.data->fix.longitude);
  		}
  	*/
- 		
-		//sleep(3);	
+
+		//sleep(3);
 	return 0;
 }

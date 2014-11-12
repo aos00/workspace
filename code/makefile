@@ -13,10 +13,10 @@ main.o: ./source/main.cpp
 gpsdevice.o: ./source/GPSDevice/gpsdevice.cpp ./include/gpsdevice.hpp ./include/common.hpp
 	$(CC) $(CCFLAGS) -c ./source/GPSDevice/gpsdevice.cpp
 
-gopro.o: ./source/GoPro/gopro.cpp ./include/gopro.hpp
+gopro.o: ./source/GoPro/gopro.cpp ./include/gopro.hpp ./include/common.hpp
 	$(CC) $(CCFLAGS) -c ./source/GoPro/gopro.cpp
 
-photo.o: ./source/GoPro/photo.cpp ./include/photo.hpp
+photo.o: ./source/GoPro/photo.cpp ./include/photo.hpp ./include/common.hpp
 	$(CC) $(CCFLAGS) -c ./source/GoPro/photo.cpp
 
 photohandler.o: ./source/PhotoHandler/photohandler.cpp ./include/photohandler.hpp

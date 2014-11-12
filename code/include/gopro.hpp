@@ -13,6 +13,7 @@
 #include <photo.hpp>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include "common.hpp"
 
 using namespace std;
 
@@ -24,18 +25,15 @@ class GoPro
 		FILE *fp;
 		short PHOTO_ID;
 		vector<Photo> photos;
-
 		short getID();
 
-		//size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream); Obsoleto: usando funcao default do curl
-
-	public:	
+	public:
 
 		GoPro(short);
 		void takePicture(); //Bater uma foto
-		void takePicture(double, double, double); //Bater uma foto
-		Photo * getImage(short); //Download da imagem localizada no servidor da camera a partir do id
-		Photo * getImage(); //Download da ultima imagem fotografada
+		void takePicture(const location*); //Bater uma foto
+		Photo * downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
+		Photo * downloadImage(); //Download da ultima imagem fotografada
 };
 
 #endif

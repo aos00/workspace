@@ -7,11 +7,18 @@
 
 #include "photo.hpp"
 
-Photo::Photo(const char * file_path, short ID) {
-	filepath = file_path;
-	id = ID; 
-}
 
-Photo::Photo(short id, int latitude, int longitude){
-	
+
+Photo::Photo(short ID, const location *locat, bool dl) {
+	id = ID;
+	downloaded = dl;
+	if(locat != NULL){
+        loc.coordinate.latitude = locat->coordinate.latitude;
+        loc.coordinate.longitude = locat->coordinate.longitude;
+        loc.date = locat->date;
+	}else{
+        loc.coordinate.latitude = 0.0;
+        loc.coordinate.longitude = 0.0;
+        loc.date = "nodate";
+	}
 }
