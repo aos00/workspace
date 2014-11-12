@@ -2,19 +2,24 @@
 #define __TARGETAREA_H_INCLUDED__
 
 #include <vector>
+#include <GeographicLib/UTMUPS.hpp>
+#include "common.hpp"
 
 using namespace std;
 
 class TargetArea
 {
 	private:
-		vector<double> x_vert;
-		vector<double> y_vert;
-		int n_vertices;	
+		vector<double> vertx;
+		vector<double> verty;
+		int nvert;
+		
+		void convertCoordinates(const double&, const double&, double&, double&);
 		
 	public:
 		TargetArea(const string&);
-		int inpoly(int, vector<double>&, vector<double>&, double, double);
+		//int inpoly(int, vector<double>&, vector<double>&, double, double);
+		bool inTarget(const coordinates&);
 		void printVector(vector<double> &src);
 			
 };

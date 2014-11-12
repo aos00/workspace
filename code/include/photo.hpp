@@ -19,6 +19,7 @@ class Photo
 		int longitude;
 		short altitude;
 		
+		Photo();
 		Photo(const char*,short);
 		Photo(short,int,int); //Constructor parameters: ID, latitude and longitude.
 		//Photo(short,int,int, FILE*); //Constructor parameters: ID, latitude and longitude, file data.

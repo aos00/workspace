@@ -16,7 +16,7 @@
 
 
 #define GPS_PORT 2947
-const string filepath = "/home/pi/raspi_local_repo/code/areapoints";
+const string filepath = "/home/pi/raspi_local_repo/code/coordenadas2";
 
 using namespace std;
 
@@ -26,7 +26,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	Photo * foto;
 	
-	GoPro camera((short) 1404);
+	//GoPro camera((short) 1404);
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
@@ -34,14 +34,28 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 	
 	TargetArea area(filepath);
 	
-	while(gps.data->status != 1)
-		gps.read_data();
+	while(1){
+		if(gps.read_data()){
+			if(area.inTarget(gps.current_coord)){
+				cout << "take picture" << endl;
+			}
+		}
+	}
+	/*
 	
-		if(area.inpoly(){
+	while(gps.data->status != 1){
+		gps.read_data();
+	}
+	* 
+	* 
+	*/
+	/*
+		if(1){
 			camera.takePicture();
 			foto = camera.getImage();
 			handler.stampCoordinates(foto,gps.data->fix.latitude, gps.data->fix.longitude);
  		}
+ 	*/
  		
 		//sleep(3);	
 	return 0;

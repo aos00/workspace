@@ -10,47 +10,21 @@
 
 #include <libgpsmm.h>
 #include <iostream>
-#include <GeographicLib/UTMUPS.hpp>
-
-struct coordinates {
-	double latitude;
-	double longitude;
-};
-
-struct photo_info {
-	coordinates coord;
-	double altitude;
-	char * date;
-};
-
-struct point {
-	double x;
-	double y;
-};
+#include "common.hpp"
 
 
 class GPSDevice
 {
-	private:
-	
-	/*Target points which define the earth surface*/
-		struct coordinates target_ptA;
-		struct coordinates target_ptB;
-		struct coordinates target_ptC;
-		struct coordinates target_ptD;
-		
+	private:			
 		gpsmm * gps_receiver;
 		
-		void convertCoordinates(coordinates&); //Convert from latitude/longitude to UTM
 		
 	public:
-		struct gps_data_t * data;
-	
+		struct gps_data_t * data;	
 		GPSDevice(const char*, const int);
-		void setTarget(coordinates,coordinates,coordinates,coordinates);
-		void read_data();
-		void setStatus(int);
-		bool inSurface();
+		int read_data();		
+		struct coordinates current_coord;
+		char scr[100];
 	
 };
 

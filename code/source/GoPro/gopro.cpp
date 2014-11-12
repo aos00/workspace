@@ -92,9 +92,9 @@ Photo * GoPro::getImage(short ID)
 	curl_easy_cleanup(curl);
 	fclose(fp);
 
-	Photo pht(filename,ID);
+	photos.push_back(Photo(filename,ID));
 
-	return &pht;
+	return NULL;
 
 }
 

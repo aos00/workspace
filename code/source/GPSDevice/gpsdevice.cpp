@@ -24,14 +24,15 @@
  *	@Date: October, 2014.
  */
 
-#define __DEBUG__
+//#define __DEBUG__
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cmath>
 #include "gpsdevice.hpp"
 
 using namespace std;
-using namespace GeographicLib;
+
 
 GPSDevice::GPSDevice(const char *address, const int port)
 {
@@ -51,58 +52,46 @@ GPSDevice::GPSDevice(const char *address, const int port)
 	
 	printf("Checking if data is available:\n");
 	if (gps_receiver->stream(WATCH_ENABLE|WATCH_JSON) == NULL)
-        perror("GPSD nao esta executando!\n");
+        perror("GPSD daemon is not running!\n");
     else
-		printf("GPS receiver is running!\n");		
+		printf("GPSD daemon is running!\n");		
 }
 
 
-void GPSDevice::read_data()
-{		
-		if(gps_receiver->waiting(500000)){ //Return true if theres data ready for the client
-		
-			if((data = gps_receiver->read()) == NULL){
-				printf("Erro ao ler os dados do gps\n");
-			} else{
-				#ifdef __DEBUG__
-				if(!(isnan(data->fix.latitude) || isnan(data->fix.longitude))){
-					printf("Status: %i\n",data->status);
-					printf("Latitude: %f, Longitude: %f \n",data->fix.latitude, data->fix.longitude);
-					//cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
-				}else{
-					printf("Latitude or Longitude is NaN");
-				}
-				#endif
-			}
-	}else{
+int GPSDevice::read_data()
+{	
+	if(!gps_receiver->waiting(500000)){
+		//gps_clear_fix();
 		#ifdef __DEBUG__
-		printf(" No data available to the client, gps module is connected to UART?" );
+		printf(" No data available to the client, is the gps module connected to UART?\n" );
 		#endif
+		return 0;
+	}
+	
+	if((data = gps_receiver->read()) == NULL){
+		#ifdef __DEBUG__
+		printf("Erro ao ler os dados do gps\n");
+		printf("3Status: %i\n",data->status);
+		printf("3Mode: %i\n",data->fix.mode);
+		#endif
+		return 0;
+	}
+	
+
+	
+	if(!(std::isnan(data->fix.latitude) || std::isnan(data->fix.longitude))){
+		current_coord.latitude = data->fix.latitude;
+		current_coord.longitude = data->fix.longitude;
+		
+		#ifdef __DEBUG__
+		printf("4Status: %i\n",data->status);
+		printf("4Mode: %i\n",data->fix.mode);
+		printf("Latitude: %f, Longitude: %f \n",data->fix.latitude, data->fix.longitude);
+		cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
+		#endif
+		return 1;
+	}else{		
+		printf("Latitude or Longitude is NaN");		
+		return 0;
 	}
 }
-
-bool GPSDevice::inSurface(){return true;}
-
-void GPSDevice::convertCoordinates(coordinates &coord)
-{
-	try {  
-      
-      int zone;
-      bool northp;
-      double x, y;
-      UTMUPS::Forward(coord.latitude, coord.longitude, zone, northp, x, y);
-      //string zonestr = UTMUPS::EncodeZone(zone, northp);
-      
-      #ifdef __DEBUG__
-      printf("Latitude: %f ; Longitude: %f, x: %f; y: %f", coord.latitude, coord.longitude, x ,y);
-      //cout << fixed << setprecision(2) << zonestr << " " << x << " " << y << "\n";
-      #endif
-      
-    }catch (const exception& e) {
-    
-		//cerr << "Caught exception: " << e.what() << "\n";
-	}	
-}
-
-
-
