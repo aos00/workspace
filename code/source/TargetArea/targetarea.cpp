@@ -1,4 +1,5 @@
-#define __DEBUG__
+//#define __DEBUG_READING_FILE__
+//#define __DEBUG_COVERSION__
 
 #include <fstream>
 #include <iostream>
@@ -18,7 +19,7 @@ TargetArea::TargetArea(const string &file_path) {
 	string coordinate;
 	//string full_file_path = filepath + string("areapoints");
 
-	#ifdef __DEBUG__
+	#ifdef __DEBUG_READING_FILE__
 	printf("TargetArea(): Filepath: %s\n",file_path.c_str());
 	#endif
 
@@ -29,26 +30,26 @@ TargetArea::TargetArea(const string &file_path) {
 		double x, y;
 		while(getline(areapoints,coordinate)) {
 			delmpos = coordinate.find(",");
-			
+
 			double log = atof((coordinate.substr(0,delmpos)).c_str());
 			double lat = atof((coordinate.substr(delmpos+1, string::npos)).c_str());
-			
-			convertCoordinates(lat, log, x, y);					
-			
+
+			convertCoordinates(lat, log, x, y);
+
 			vertx.push_back(x);
 			verty.push_back(y);
 			nvert++;
 		}
-		
+
 		areapoints.close();
 
-		#ifdef __DEBUG__
+		#ifdef __DEBUG_READING_FILE__
 		printf("Number of vertices: %i\n", nvert);
 		printf("X vertices:\n");
 		printVector(vertx);
 		printf("\nY vertices: \n");
 		printVector(verty);
-		#endif		
+		#endif
 
 	}else{
 		perror("Cant open this file!");
@@ -63,7 +64,7 @@ void TargetArea::printVector(vector<double> &src) {
 }
 
 
-/* 
+/*
  * Point Inclusion in Polygon Algorithm
  * Copyright (c) 1970-2003, Wm. Randolph Franklin
 */
@@ -102,22 +103,22 @@ bool TargetArea::inTarget(const coordinates &coord)
 
 void TargetArea::convertCoordinates(const double &latitude, const double &longitude, double &x, double &y)
 {
-	try {  
-      
+	try {
+
       int zone;
       bool northp;
       UTMUPS::Forward(latitude, longitude, zone, northp, x, y);
       string zonestr = UTMUPS::EncodeZone(zone, northp);
-      
-      #ifdef __DEBUG__
+
+      #ifdef __DEBUG_COVERSION__
       printf("Converted Latitude: %f ; Longitude: %f, x: %f; y: %f\n", latitude, longitude, x, y);
       cout << "Zone: " << zonestr << endl;
       #endif
-      
+
     }catch (const exception& e) {
-    
+
 		//cerr << "Caught exception: " << e.what() << "\n";
-	}	
+	}
 }
 
 

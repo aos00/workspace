@@ -14,7 +14,7 @@ struct coordinates {
 
 struct location {
     coordinates coordinate;
-    float altitude;
+    double altitude;
     string date;
 };
 

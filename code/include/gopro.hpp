@@ -34,6 +34,7 @@ class GoPro
 		void takePicture(const location*); //Bater uma foto
 		Photo * downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
 		Photo * downloadImage(); //Download da ultima imagem fotografada
+        bool writePhotoRecords();
 };
 
 #endif

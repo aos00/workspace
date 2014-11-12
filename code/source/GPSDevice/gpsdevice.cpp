@@ -24,7 +24,7 @@
  *	@Date: October, 2014.
  */
 
-//#define __DEBUG__
+#define __DEBUG__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,7 +60,7 @@ GPSDevice::GPSDevice(const char *address, const int port)
 
 int GPSDevice::read_data()
 {
-	if(!gps_receiver->waiting(500000)){
+	if(!gps_receiver->waiting(5000000)){
 		//gps_clear_fix();
 		#ifdef __DEBUG__
 		printf(" No data available to the client, is the gps module connected to UART?\n" );
@@ -80,26 +80,26 @@ int GPSDevice::read_data()
 
 
 	if(!(std::isnan(data->fix.latitude) || std::isnan(data->fix.longitude))){
-		current_location.coordenate.lalitude = data->fix.latitude;
-        current_location.coordenate.longitude = data->fix.longitude;
+		current_location.coordinate.latitude = data->fix.latitude;
+        current_location.coordinate.longitude = data->fix.longitude;
 
 		#ifdef __DEBUG__
 		printf("4Status: %i\n",data->status);
 		printf("4Mode: %i\n",data->fix.mode);
-		printf("Latitude: %f, Longitude: %f \n",data->fix.latitude, data->fix.longitude);
+		printf("Latitude: %f, Longitude: %f, Altitude: %f \n",data->fix.latitude, data->fix.longitude, data->fix.altitude);
 		cout << "Data: " << unix_to_iso8601(data->fix.time, scr, sizeof(scr)) << endl;
 		#endif
 
 		return 1;
 	}else{
-		printf("Latitude or Longitude is NaN");
+		printf("Latitude or Longitude is NaN\n");
 		return 0;
 	}
 }
 
 void GPSDevice::setLocation(){
-    current_location.coordenate.lalitude = data->fix.latitude;
-    current_location.coordenate.longitude = data->fix.longitude;
+    current_location.coordinate.latitude = data->fix.latitude;
+    current_location.coordinate.longitude = data->fix.longitude;
     current_location.altitude = data->fix.altitude;
     current_location.date = string(unix_to_iso8601(data->fix.time, scr, sizeof(scr)));
 }

@@ -8,7 +8,10 @@
 #define __DEBUG__
 
 #include <iostream>
+#include <fstream>
+#include <iostream>
 #include <assert.h>
+#include <iomanip>
 #include "gopro.hpp"
 
 
@@ -27,6 +30,8 @@ GoPro::GoPro(short id)
 
 void GoPro::takePicture(const location *loc)
 {
+
+    #ifdef __HAS_CAMERA__
 	curl = curl_easy_init();
 	assert(curl != NULL);
 
@@ -47,7 +52,10 @@ void GoPro::takePicture(const location *loc)
 
 	curl_easy_cleanup(curl);
 
-	photos.push_back(Photo(PHOTO_ID, loc, false))
+	#endif
+
+    cout << " aqui!" << endl;
+	photos.push_back(Photo(PHOTO_ID, loc, false));
 
 	PHOTO_ID++;
 }
@@ -101,4 +109,23 @@ Photo * GoPro::downloadImage(short ID)
 
 short GoPro::getID() { return PHOTO_ID; }
 
+bool GoPro::writePhotoRecords(){
+    ofstream photoInfo("./img/photo");
 
+    if(!photoInfo.is_open())
+        return -1;
+
+    #ifdef __DEBUG__
+    printf("Writing photo information to file...\n");
+    #endif
+
+    for(vector<Photo>::iterator it = photos.begin(); it != photos.end(); it++){
+		printf("%i,%f,%f,%f,%s\n",it->id,it->loc.coordinate.latitude,it->loc.coordinate.longitude,it->loc.altitude,it->loc.date.c_str());
+        photoInfo << std::setprecision(6) << it->id << "," << it->loc.coordinate.latitude << "," << it->loc.coordinate.longitude << "," << it->loc.altitude << "," << it->loc.date << endl;
+        //photoInfo << "\n" << endl;
+    }
+
+    photoInfo.close();
+    return true;
+
+}
