@@ -32,7 +32,7 @@ void shutter(void){
 	time_new = millis();
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
-	camera.takePicture(NULL);
+	camera.pressShutter();
 	time_old = time_new;
 }
 
@@ -40,7 +40,7 @@ void shutter(void){
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
-	camera.init((short) 1404);
+	camera.init((short) 1404, VIDEO_MODE);
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
@@ -48,7 +48,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	TargetArea area(filepath);
 
-	camera.setCameraMode(PHOTO_MODE);
+	//camera.setCameraMode(PHOTO_MODE);
 
 	if (wiringPiSetup () < 0) {
 	      perror("Unable to setup wiringPi: %s\n");

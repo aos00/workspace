@@ -36,11 +36,11 @@ using namespace std;
 
 GPSDevice::GPSDevice(const char *address, const int port)
 {
-	printf("##GPSDevice: Starting GPS...\nChecking if processor is available...\n");
+	printf("##GPSDevice: Starting GPS...\n ##GPSDevice: Checking if processor is available...\n");
 	if(system(NULL)){
 		printf("##GPSDevice: Processor available! Executing commmand to gpsd start\n");
 		if(system("sudo gpsd /dev/ttyAMA0 -F /var/run/gpsd.sock") == 0){
-			printf("##GPSDevice: GPSD Daemon started...");
+			printf("##GPSDevice: GPSD Daemon started...\n");
 		}else{
 			perror("##GPSDevice: Error starting GPSD!\n");
 		}
