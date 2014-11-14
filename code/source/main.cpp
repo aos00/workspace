@@ -13,18 +13,34 @@
 #include "photohandler.hpp"
 #include "photo.hpp"
 #include "targetarea.hpp"
+#include <wiringPi.h>
 
-
+#define BUTTON_PIN 0
 #define GPS_PORT 2947
+#define DEBOUNCING_TIME 1000
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
 
 using namespace std;
 
 const char * GPS_ADDRESS = "localhost";
+unsigned int time_new = 0;
+unsigned int time_old = 0;
+GoPro camera;
+
+
+void shutter(void){
+	time_new = millis();
+	if((time_new - time_old) < DEBOUNCING_TIME)
+		return;
+	camera.takePicture(NULL);
+	time_old = time_new;
+}
+
+
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
-	GoPro camera((short) 1404);
+	camera.init((short) 1404);
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
@@ -34,8 +50,20 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	camera.setCameraMode(PHOTO_MODE);
 
-    int m=0;
+	if (wiringPiSetup () < 0) {
+	      perror("Unable to setup wiringPi: %s\n");
+     	 return -1;
+	}
+
+	if( wiringPiISR (BUTTON_PIN, INT_EDGE_FALLING, &shutter) < 0) {
+		perror("Unable to setup ISR: %s\n");
+      		return 1;
+  	}
+
+
+	int m=0;
 	while(1){
+/*
 	    if(m>50)
             break;
 		if(gps.read_data()){
@@ -48,7 +76,9 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 			}
 		}
+*/
 	}
+
 	camera.writePhotoRecords();
 
 	return 0;

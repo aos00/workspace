@@ -1,7 +1,7 @@
 CC=g++
 
 CCFLAGS= -Wall -I./include/
-CFLAGS= -Wall -lgps -lcurl -lGeographic `pkg-config --libs opencv`
+CFLAGS= -Wall -lwiringPi -lgps -lcurl -lGeographic `pkg-config --libs opencv`
 #CFLAGS= -Wall -I./include/
 
 executavel: main.o gpsdevice.o gopro.o photo.o photohandler.o targetarea.o

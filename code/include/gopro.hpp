@@ -27,14 +27,12 @@ class GoPro
 		FILE *fp;
 		short PHOTO_ID;
 		vector<Photo> photos;
-		short getID();
+//		short getID();
 
 	public:
-		GoPro(const short);
-		void takePicture(); //Bater uma foto
+		int init(const short); //Initializing camera
 		void takePicture(const location*); //Bater uma foto
 		Photo * downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
-		Photo * downloadImage(); //Download da ultima imagem fotografada
         bool writePhotoRecords();
         bool setCameraMode(const short);
 };
