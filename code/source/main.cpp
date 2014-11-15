@@ -15,7 +15,10 @@
 #include "targetarea.hpp"
 #include <wiringPi.h>
 
-#define BUTTON_PIN 0
+#define SHUTTER_PIN 0
+#define MODE_PIN 3
+#define START_STOP_PIN 4
+
 #define GPS_PORT 2947
 #define DEBOUNCING_TIME 1000
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
@@ -27,6 +30,7 @@ unsigned int time_new = 0;
 unsigned int time_old = 0;
 GoPro camera;
 
+int setInterrupts(void);
 
 void shutter(void){
 	time_new = millis();
@@ -36,6 +40,22 @@ void shutter(void){
 	time_old = time_new;
 }
 
+void nextMode(void) {
+	time_new = millis();
+	if((time_new - time_old) < DEBOUNCING_TIME)
+		return;
+	camera.setNextMode();
+	time_old = time_new;
+}
+
+void startRoutine(void) {
+	time_new = millis();
+	if((time_new - time_old) < DEBOUNCING_TIME)
+		return;
+	printf("Starting Routine..\n");
+	//camera.setNextMode();
+	time_old = time_new;
+}
 
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
@@ -47,19 +67,8 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 	PhotoHandler handler;
 
 	TargetArea area(filepath);
-
-	//camera.setCameraMode(PHOTO_MODE);
-
-	if (wiringPiSetup () < 0) {
-	      perror("Unable to setup wiringPi: %s\n");
-     	 return -1;
-	}
-
-	if( wiringPiISR (BUTTON_PIN, INT_EDGE_FALLING, &shutter) < 0) {
-		perror("Unable to setup ISR: %s\n");
-      		return 1;
-  	}
-
+	
+	setInterrupts();
 
 	int m=0;
 	while(1){
@@ -83,3 +92,33 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
 	return 0;
 }
+
+int setInterrupts(){
+	
+	#ifdef __DEBUG__
+	printf("Stetting interrupts...\n");
+	#endif
+	
+	
+	if (wiringPiSetup () < 0) {
+	      perror("Unable to setup wiringPi: %s\n");
+     	 return -1;
+	}
+
+	if( wiringPiISR (MODE_PIN, INT_EDGE_FALLING, &nextMode) < 0) {
+		perror("Unable to setup ISR: %s\n");
+      		return -1;
+  	}
+  	
+  	if( wiringPiISR (SHUTTER_PIN, INT_EDGE_FALLING, &shutter) < 0) {
+		perror("Unable to setup ISR: %s\n");
+      		return -1;
+  	}
+  	
+  	if( wiringPiISR (START_STOP_PIN, INT_EDGE_FALLING, &startRoutine) < 0) {
+		perror("Unable to setup ISR: %s\n");
+      		return -1;
+  	}
+  	return 1;
+}
+	

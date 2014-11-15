@@ -32,15 +32,16 @@ class GoPro
 		vector<Photo> photos;
 		unsigned short mode;
 		unsigned short submode;
+		bool executeCommand(const char*);
 
 	public:
 		int init(const short, const short); //Initializing camera
 		void takePicture(const location*); //Bater uma foto
 		Photo * downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
-        bool writePhotoRecords();
+        bool writePhotoRecords(void);
         bool setCameraMode(const short);
         bool pressShutter(void);
-        bool executeCommand(const char*);
+        bool setNextMode(void);
 };
 
 #endif

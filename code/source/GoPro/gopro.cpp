@@ -186,6 +186,15 @@ bool GoPro::writePhotoRecords(){
 
 }
 
+bool GoPro::setNextMode(){
+	if(mode == PHOTO_MODE)
+		return setCameraMode(VIDEO_MODE);
+	else if(mode == VIDEO_MODE)
+		return setCameraMode(BURST_MODE);
+	else if(mode == BURST_MODE)
+		return setCameraMode(PHOTO_MODE);
+}
+
 bool GoPro::setCameraMode(const short new_mode){
 
     #ifdef __DEBUG__

@@ -38,7 +38,7 @@ GPSDevice::GPSDevice(const char *address, const int port)
 {
 	printf("##GPSDevice: Starting GPS...\n ##GPSDevice: Checking if processor is available...\n");
 	if(system(NULL)){
-		printf("##GPSDevice: Processor available! Executing commmand to gpsd start\n");
+		printf("##GPSDevice: Processor available! Executing commmand to start gpsd\n");
 		if(system("sudo gpsd /dev/ttyAMA0 -F /var/run/gpsd.sock") == 0){
 			printf("##GPSDevice: GPSD Daemon started...\n");
 		}else{
