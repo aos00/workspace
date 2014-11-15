@@ -35,8 +35,17 @@ int GoPro::init(const short id, const short cammode)
 
 	CURL *curl;
 	CURLcode res;
+	STATUS_CAMERA = STATUS_OK;
 	
 	curl = curl_easy_init();
+	
+	
+	if(curl == NULL){
+		perror("#GoPro: INIT cannot initialize curl! \n");
+		STATUS_CAMERA = STATUS_ERROR;
+		return STATUS_CAMERA;
+	}
+	
 	if(curl_easy_setopt(curl, CURLOPT_URL, CHECK_AVAILABILITY_URL) !=  CURLE_OK) perror("Take picture: curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_NOBODY, true) !=  CURLE_OK) perror("Take picture: curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true) !=  CURLE_OK) perror("Take picture: curl set url opt error !");
@@ -51,8 +60,9 @@ int GoPro::init(const short id, const short cammode)
 
 	if(res != CURLE_OK){
 
-	      	fprintf(stderr, "##GoPro CAMERA_INIT() ERROR! curl_easy_perform() failed: %s  ERROR NUMBER: %i\n", curl_easy_strerror(res), res);
-		return res;
+	    fprintf(stderr, "##GoPro CAMERA_INIT() ERROR! curl_easy_perform() failed: %s  ERROR NUMBER: %i\n", curl_easy_strerror(res), res);
+		STATUS_CAMERA = STATUS_ERROR;
+		return STATUS_CAMERA;
 	}
 	//ERRO numero 7 quando o raspi nao esta conectado no GoPro (Network unreachable)
 	curl_easy_cleanup(curl);
@@ -62,9 +72,13 @@ int GoPro::init(const short id, const short cammode)
 	printf("##GoPro init(): camera initialized successfully!\n");
 	#endif
 
-	if(setCameraMode(cammode) != 1) perror("##GoPro: init(): Cannot change camera mode\n");
+	//if(setCameraMode(cammode) == STATUS_ERROR){
+	//	STATUS_CAMERA = STATUS_ERROR;
+//		perror("##GoPro: init(): Cannot change camera mode\n");
+	//	return STATUS_CAMERA;
+	//}
 	mode = cammode;
-	return 1;
+	return STATUS_CAMERA;
 }
 
 
@@ -193,12 +207,14 @@ bool GoPro::setNextMode(){
 		return setCameraMode(BURST_MODE);
 	else if(mode == BURST_MODE)
 		return setCameraMode(PHOTO_MODE);
+	else
+		return false;
 }
 
 bool GoPro::setCameraMode(const short new_mode){
 
     #ifdef __DEBUG__
-    printf("##GoPro: Setting camera mode to %i\n", mode);
+    printf("##GoPro: Switching camera mode: %i\n", mode);
     #endif
 
     if(new_mode == VIDEO_MODE){

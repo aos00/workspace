@@ -1,13 +1,13 @@
 CC=g++
 
 CCFLAGS= -Wall -I./include/
-CFLAGS= -Wall -lwiringPi -lgps -lcurl -lGeographic `pkg-config --libs opencv`
+CFLAGS= -Wall -lwiringPi -lgps -lcurl -lGeographic -lpthread `pkg-config --libs opencv`
 #CFLAGS= -Wall -I./include/
 
 executavel: main.o gpsdevice.o gopro.o photo.o photohandler.o targetarea.o
 	$(CC) $(CFLAGS) main.o gpsdevice.o gopro.o photo.o photohandler.o targetarea.o -o executavel
 
-main.o: ./source/main.cpp
+main.o: ./source/main.cpp ./include/common.hpp
 	$(CC) $(CCFLAGS) -c ./source/main.cpp
 
 gpsdevice.o: ./source/GPSDevice/gpsdevice.cpp ./include/gpsdevice.hpp ./include/common.hpp

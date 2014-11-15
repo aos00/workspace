@@ -7,20 +7,27 @@
 
 #define __DEBUG__
 
+#include <wiringPi.h>
+#include <pthread.h>
 #include <stdio.h>
 #include "gopro.hpp"
 #include "gpsdevice.hpp"
 #include "photohandler.hpp"
 #include "photo.hpp"
 #include "targetarea.hpp"
-#include <wiringPi.h>
+#include "common.hpp"
 
-#define SHUTTER_PIN 0
-#define MODE_PIN 3
-#define START_STOP_PIN 4
+
+#define PIN_SHUTTER 0
+#define PIN_MODE 2
+#define PIN_START 3
+#define PIN_LED_GPS 1
+#define PIN_LED_CAMERA 4
+#define PIN_LED_TARGET 5
+#define PIN_LED_DWL 6
 
 #define GPS_PORT 2947
-#define DEBOUNCING_TIME 1000
+#define DEBOUNCING_TIME 500
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
 
 using namespace std;
@@ -29,8 +36,11 @@ const char * GPS_ADDRESS = "localhost";
 unsigned int time_new = 0;
 unsigned int time_old = 0;
 GoPro camera;
+pthread_t tread_checkleds;
 
 int setInterrupts(void);
+int setupWiringPi(void);
+void* checkLEDs(void*);
 
 void shutter(void){
 	time_new = millis();
@@ -57,16 +67,31 @@ void startRoutine(void) {
 	time_old = time_new;
 }
 
+void driveLEDs_ALL_RED(){
+	
+	
+}
+
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
-	camera.init((short) 1404, VIDEO_MODE);
+	if(setupWiringPi() < 1 ){
+			perror("##INIT ERROR CANNOR SETUP WIRING PI!! EXITTING...\n");
+			return -1;
+	}
+
+	camera.init((short) 1404, PHOTO_MODE);
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
 	PhotoHandler handler;
 
 	TargetArea area(filepath);
+	
+	
+	
+	pthread_create(&tread_checkleds, NULL, checkLEDs, NULL);
+	//testLEDs();
 	
 	setInterrupts();
 
@@ -93,32 +118,64 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 	return 0;
 }
 
-int setInterrupts(){
-	
-	#ifdef __DEBUG__
-	printf("Stetting interrupts...\n");
-	#endif
-	
-	
+int setupWiringPi(){
 	if (wiringPiSetup () < 0) {
-	      perror("Unable to setup wiringPi: %s\n");
+	     perror("Unable to setup wiringPi: %s\n");
      	 return -1;
 	}
+	pinMode(PIN_LED_GPS, OUTPUT);
+	pinMode(PIN_LED_CAMERA, OUTPUT);
+	pinMode(PIN_LED_TARGET, OUTPUT);
+	pinMode(PIN_LED_DWL, OUTPUT);
+	return 1;
+}
 
-	if( wiringPiISR (MODE_PIN, INT_EDGE_FALLING, &nextMode) < 0) {
+int setInterrupts(void){
+	
+	#ifdef __DEBUG__
+	printf("##INIT Stetting interrupts...\n");
+	#endif
+	
+
+	if( wiringPiISR (PIN_MODE, INT_EDGE_FALLING, &nextMode) < 0) {
 		perror("Unable to setup ISR: %s\n");
       		return -1;
   	}
   	
-  	if( wiringPiISR (SHUTTER_PIN, INT_EDGE_FALLING, &shutter) < 0) {
+  	if( wiringPiISR (PIN_SHUTTER, INT_EDGE_FALLING, &shutter) < 0) {
 		perror("Unable to setup ISR: %s\n");
       		return -1;
   	}
   	
-  	if( wiringPiISR (START_STOP_PIN, INT_EDGE_FALLING, &startRoutine) < 0) {
+  	if( wiringPiISR (PIN_START, INT_EDGE_FALLING, &startRoutine) < 0) {
 		perror("Unable to setup ISR: %s\n");
       		return -1;
   	}
+  	
+  	#ifdef __DEBUG__
+	printf("##INIT  All Interrupts were set!\n");
+	#endif
   	return 1;
 }
+
+void *checkLEDs(void*){
 	
+	#ifdef __DEBUG__
+	printf("##INIT checinkg LEDs...\n");
+	#endif
+
+	for(short i=0; i<3; i++){
+		digitalWrite(PIN_LED_GPS, LOW);	delay(250);
+		digitalWrite(PIN_LED_GPS, HIGH); delay(250);
+		digitalWrite(PIN_LED_CAMERA, LOW);	delay(250);
+		digitalWrite(PIN_LED_CAMERA, HIGH);	delay(250);
+		digitalWrite(PIN_LED_TARGET, LOW); delay(250);
+		digitalWrite(PIN_LED_TARGET, HIGH);	delay(250);
+		digitalWrite(PIN_LED_DWL,LOW); delay(250);
+		digitalWrite(PIN_LED_DWL, HIGH); delay(250);		
+	}
+	
+	#ifdef __DEBUG__
+	printf("##INIT LEDs check finished!\n");
+	#endif
+}
