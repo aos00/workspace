@@ -32,6 +32,10 @@ const string filepath = "/home/pi/raspi_local_repo/code/quadra";
 
 using namespace std;
 
+unsigned short STATUS_CAMERA;
+unsigned short STATUS_GPS;
+unsigned short STATUS_IN_TARGET;
+
 const char * GPS_ADDRESS = "localhost";
 unsigned int time_new = 0;
 unsigned int time_old = 0;
@@ -79,8 +83,12 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 			perror("##INIT ERROR CANNOR SETUP WIRING PI!! EXITTING...\n");
 			return -1;
 	}
-
-	camera.init((short) 1404, PHOTO_MODE);
+	
+	try{
+		camera.init((short) 1404, PHOTO_MODE);
+	}catch (CURLcode res){
+		fprintf(stderr, "##GoPro CAMERA_INIT() ERROR! curl_easy_perform() failed: %s  ERROR NUMBER: %i\n", curl_easy_strerror(res), res);
+	}
 
 	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
 
@@ -119,6 +127,11 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 }
 
 int setupWiringPi(){
+	
+	#ifdef __DEBUG__
+	printf("##INIT Stetting up WiringPi...\n");
+	#endif
+	
 	if (wiringPiSetup () < 0) {
 	     perror("Unable to setup wiringPi: %s\n");
      	 return -1;
@@ -127,6 +140,11 @@ int setupWiringPi(){
 	pinMode(PIN_LED_CAMERA, OUTPUT);
 	pinMode(PIN_LED_TARGET, OUTPUT);
 	pinMode(PIN_LED_DWL, OUTPUT);
+	
+	#ifdef __DEBUG__
+	printf("##INIT WiringPi finished!\n");
+	#endif	
+	
 	return 1;
 }
 
