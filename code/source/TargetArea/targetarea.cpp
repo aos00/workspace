@@ -14,13 +14,15 @@ using namespace GeographicLib;
 void printVector(vector<double>&);
 
 /* Read file with the area points and load them to memory */
-TargetArea::TargetArea(const string &file_path) {
+void TargetArea::init(const string &file_path) {
 	nvert = 0;
 	string coordinate;
 	//string full_file_path = filepath + string("areapoints");
 
+	printf("##INIT TargetArea: initializing TargetArea...\n");
+
 	#ifdef __DEBUG_READING_FILE__
-	printf("TargetArea(): Filepath: %s\n",file_path.c_str());
+	printf("##INIT TargetArea: Filepath: %s\n",file_path.c_str());
 	#endif
 
 	ifstream areapoints(file_path.c_str());
@@ -52,8 +54,9 @@ TargetArea::TargetArea(const string &file_path) {
 		#endif
 
 	}else{
-		perror("Cant open this file!");
+		throw("##INIT TargetArea: Cant open this file!");
 	}
+	printf("##INIT TargetArea: TargetArea initialized!\n");
 }
 
 
@@ -116,8 +119,7 @@ void TargetArea::convertCoordinates(const double &latitude, const double &longit
       #endif
 
     }catch (const exception& e) {
-
-		//cerr << "Caught exception: " << e.what() << "\n";
+		throw(e.what());
 	}
 }
 

@@ -7,9 +7,6 @@
 #define PHOTO_MODE 1
 #define BURST_MODE 2
 
-#define STATUS_ERROR 0;
-#define STATUS_OK 1;
-
 using namespace std;
 
 struct coordinates {

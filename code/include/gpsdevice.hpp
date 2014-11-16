@@ -24,7 +24,7 @@ class GPSDevice
 		struct location current_location;
 		char scr[100];
 
-		GPSDevice(const char*, const int);
+		void init(const char*, const int);
 		void setLocation();
 		int read_data();
 

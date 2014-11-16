@@ -17,7 +17,7 @@ class TargetArea
 		void convertCoordinates(const double&, const double&, double&, double&);
 
 	public:
-		TargetArea(const string&);
+		void init(const string&);
 		//int inpoly(int, vector<double>&, vector<double>&, double, double);
 		bool inTarget(const coordinates&);
 		void printVector(vector<double> &src);

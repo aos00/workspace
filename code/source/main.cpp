@@ -25,26 +25,33 @@
 #define PIN_LED_CAMERA 4
 #define PIN_LED_TARGET 5
 #define PIN_LED_DWL 6
+#define PIN_LED_ROUTINE 7
+
+#define STATUS_ERROR 0
+#define STATUS_OK 1
 
 #define GPS_PORT 2947
 #define DEBOUNCING_TIME 500
+
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
 
 using namespace std;
 
-unsigned short STATUS_CAMERA;
-unsigned short STATUS_GPS;
-unsigned short STATUS_IN_TARGET;
+bool STATUS_CAMERA = false;
+bool STATUS_GPS = false;
+bool STATUS_IN_TARGET = false;
+bool STATUS_ROUTINE = false;
 
 const char * GPS_ADDRESS = "localhost";
 unsigned int time_new = 0;
 unsigned int time_old = 0;
 GoPro camera;
-pthread_t tread_checkleds;
+GPSDevice gps;
+TargetArea area;
 
 int setInterrupts(void);
 int setupWiringPi(void);
-void* checkLEDs(void*);
+void checkLEDs(void);
 
 void shutter(void){
 	time_new = millis();
@@ -66,133 +73,194 @@ void startRoutine(void) {
 	time_new = millis();
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
-	printf("Starting Routine..\n");
-	//camera.setNextMode();
+	
+	printf("Starting routine\n");
+	if(STATUS_ROUTINE){
+		STATUS_ROUTINE = false;
+		camera.writePhotoRecords();
+		
+	}else{
+		STATUS_ROUTINE = true;
+	}
 	time_old = time_new;
 }
 
 void driveLEDs_ALL_RED(){
-	
-	
+	digitalWrite(PIN_LED_GPS, LOW);
+	digitalWrite(PIN_LED_CAMERA, LOW);
+	digitalWrite(PIN_LED_TARGET, LOW);
+	digitalWrite(PIN_LED_DWL,LOW);
+	digitalWrite(PIN_LED_ROUTINE,LOW);	
 }
-
 
 int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 
-	if(setupWiringPi() < 1 ){
-			perror("##INIT ERROR CANNOR SETUP WIRING PI!! EXITTING...\n");
-			return -1;
+	//pthread_create(&tread_checkleds, NULL, checkLEDs, NULL);
+	try{
+		setupWiringPi();
+		
+	}catch (const char * msg){
+		perror(msg);
+		driveLEDs_ALL_RED();
+		return -1;
 	}
+	
+	checkLEDs();
 	
 	try{
 		camera.init((short) 1404, PHOTO_MODE);
+		digitalWrite(PIN_LED_CAMERA, LOW);
+		STATUS_CAMERA = STATUS_OK;
 	}catch (CURLcode res){
 		fprintf(stderr, "##GoPro CAMERA_INIT() ERROR! curl_easy_perform() failed: %s  ERROR NUMBER: %i\n", curl_easy_strerror(res), res);
+		digitalWrite(PIN_LED_CAMERA, HIGH);
+		STATUS_CAMERA = STATUS_ERROR;
+		return -1;
+	}catch (const char* msg){
+		perror(msg);
+		digitalWrite(PIN_LED_CAMERA, HIGH);
+		STATUS_CAMERA = STATUS_ERROR;
+		return -1;
 	}
-
-	GPSDevice gps(GPS_ADDRESS, GPS_PORT);
+	
+	try{
+		gps.init(GPS_ADDRESS, GPS_PORT);
+		digitalWrite(PIN_LED_GPS, LOW);
+		STATUS_GPS = STATUS_OK;
+	}catch (const char * msg){
+		perror(msg);
+		digitalWrite(PIN_LED_GPS, HIGH);
+		STATUS_GPS = STATUS_ERROR;
+	}	
 
 	PhotoHandler handler;
 
-	TargetArea area(filepath);
+	try{
+		area.init(filepath);
+		digitalWrite(PIN_LED_TARGET, LOW);
+		STATUS_IN_TARGET = 0;
+	}catch (const char * msg){
+		perror(msg);
+		digitalWrite(PIN_LED_TARGET, HIGH);
+		STATUS_IN_TARGET = STATUS_ERROR;
+	}		
 	
+	try{
+		setInterrupts();
+	}catch (const char * msg){
+		perror(msg);
+		driveLEDs_ALL_RED();
+	}
 	
-	
-	pthread_create(&tread_checkleds, NULL, checkLEDs, NULL);
-	//testLEDs();
-	
-	setInterrupts();
-
-	int m=0;
 	while(1){
-/*
-	    if(m>50)
-            break;
-		if(gps.read_data()){
-			if(area.inTarget(gps.current_location.coordinate)){
-			    gps.setLocation();
-				cout << "take picture" << endl;
-				camera.takePicture(&gps.current_location);
-				m++;
-
-
+		
+		if(STATUS_ROUTINE){	
+			#ifdef __DEBUG__
+			printf("Routine running...\n");
+			#endif
+			
+			try{	
+				if(gps.read_data()){
+					digitalWrite(PIN_LED_GPS, HIGH);
+					
+					if(area.inTarget(gps.current_location.coordinate)){
+						digitalWrite(PIN_LED_TARGET, HIGH);
+						gps.setLocation();
+						cout << "take picture" << endl;
+						try{
+							camera.takePicture(&gps.current_location);
+							digitalWrite(PIN_LED_CAMERA, LOW);
+						}catch (CURLcode res){
+							#ifdef __DEBUG__
+							fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+							#endif
+							digitalWrite(PIN_LED_CAMERA, HIGH);
+							STATUS_CAMERA = STATUS_ERROR;
+						}catch (const char* msg){
+							#ifdef __DEBUG__
+							perror(msg);
+							#endif
+							digitalWrite(PIN_LED_CAMERA, HIGH);
+							STATUS_CAMERA = STATUS_ERROR;
+						}
+					}else{
+						digitalWrite(PIN_LED_TARGET, HIGH);
+					}
+				}
+			}catch (const char * msg){
+				#ifdef __DEBUG__
+				perror(msg);
+				#endif
+				digitalWrite(PIN_LED_GPS, HIGH);
 			}
 		}
-*/
 	}
-
-	camera.writePhotoRecords();
-
 	return 0;
 }
 
 int setupWiringPi(){
 	
-	#ifdef __DEBUG__
-	printf("##INIT Stetting up WiringPi...\n");
-	#endif
+	printf("##INIT Stetting up WiringPi...\n");	
 	
 	if (wiringPiSetup () < 0) {
-	     perror("Unable to setup wiringPi: %s\n");
-     	 return -1;
+     	 throw("Unable to setup wiringPi: %s\n");
 	}
+	
 	pinMode(PIN_LED_GPS, OUTPUT);
 	pinMode(PIN_LED_CAMERA, OUTPUT);
 	pinMode(PIN_LED_TARGET, OUTPUT);
 	pinMode(PIN_LED_DWL, OUTPUT);
+	pinMode(PIN_LED_ROUTINE, OUTPUT);
 	
-	#ifdef __DEBUG__
-	printf("##INIT WiringPi finished!\n");
-	#endif	
+	printf("##INIT WiringPi finished!\n");	
 	
 	return 1;
 }
 
 int setInterrupts(void){
 	
-	#ifdef __DEBUG__
 	printf("##INIT Stetting interrupts...\n");
-	#endif
 	
 
 	if( wiringPiISR (PIN_MODE, INT_EDGE_FALLING, &nextMode) < 0) {
-		perror("Unable to setup ISR: %s\n");
+		throw("Unable to setup ISR: nextMode %s\n");
       		return -1;
   	}
   	
   	if( wiringPiISR (PIN_SHUTTER, INT_EDGE_FALLING, &shutter) < 0) {
-		perror("Unable to setup ISR: %s\n");
+		throw("Unable to setup ISR: shutter %s\n");
       		return -1;
   	}
   	
   	if( wiringPiISR (PIN_START, INT_EDGE_FALLING, &startRoutine) < 0) {
-		perror("Unable to setup ISR: %s\n");
+		throw("Unable to setup ISR: startRoutine %s\n");
       		return -1;
   	}
   	
-  	#ifdef __DEBUG__
-	printf("##INIT  All Interrupts were set!\n");
-	#endif
+  	printf("##INIT  All Interrupts were set!\n");
+	
   	return 1;
 }
 
-void *checkLEDs(void*){
-	
+void checkLEDs(){	
 	#ifdef __DEBUG__
 	printf("##INIT checinkg LEDs...\n");
 	#endif
-
-	for(short i=0; i<3; i++){
-		digitalWrite(PIN_LED_GPS, LOW);	delay(250);
-		digitalWrite(PIN_LED_GPS, HIGH); delay(250);
-		digitalWrite(PIN_LED_CAMERA, LOW);	delay(250);
-		digitalWrite(PIN_LED_CAMERA, HIGH);	delay(250);
-		digitalWrite(PIN_LED_TARGET, LOW); delay(250);
-		digitalWrite(PIN_LED_TARGET, HIGH);	delay(250);
-		digitalWrite(PIN_LED_DWL,LOW); delay(250);
-		digitalWrite(PIN_LED_DWL, HIGH); delay(250);		
-	}
 	
+	unsigned short delay_time = 100;
+
+	for(short i=0; i<2; i++){
+		digitalWrite(PIN_LED_GPS, LOW);	delay(delay_time);
+		digitalWrite(PIN_LED_GPS, HIGH); delay(delay_time);
+		digitalWrite(PIN_LED_CAMERA, LOW);	delay(delay_time);
+		digitalWrite(PIN_LED_CAMERA, HIGH);	delay(delay_time);
+		digitalWrite(PIN_LED_TARGET, LOW); delay(delay_time);
+		digitalWrite(PIN_LED_TARGET, HIGH);	delay(delay_time);
+		digitalWrite(PIN_LED_DWL,LOW); delay(delay_time);
+		digitalWrite(PIN_LED_DWL, HIGH); delay(delay_time);
+		digitalWrite(PIN_LED_ROUTINE,LOW); delay(delay_time);
+		digitalWrite(PIN_LED_ROUTINE,HIGH); delay(delay_time);		
+	}	
 	#ifdef __DEBUG__
 	printf("##INIT LEDs check finished!\n");
 	#endif

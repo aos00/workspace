@@ -35,15 +35,11 @@ int GoPro::init(const short id, const short cammode)
 
 	CURL *curl;
 	CURLcode res;
-	//STATUS_CAMERA = STATUS_OK;
 	
 	curl = curl_easy_init();
 	
 	
 	if(curl == NULL){
-		//perror("#GoPro: INIT cannot initialize curl! \n");
-		//STATUS_CAMERA = STATUS_ERROR;
-		//return STATUS_CAMERA;
 		throw "#GoPro: INIT cannot initialize curl! \n";
 	}
 	
@@ -60,13 +56,7 @@ int GoPro::init(const short id, const short cammode)
 	res = curl_easy_perform(curl);
 
 	if(res != CURLE_OK){
-
-	    //
-		//throw("##GoPro CAMERA_INIT() ERROR! curl_easy_perform() failed:\n");
-		//throw (curl_easy_strerror(res));
 		throw (res);
-		//throw(33);
-		//return 0;
 	}
 	//ERRO numero 7 quando o raspi nao esta conectado no GoPro (Network unreachable)
 	curl_easy_cleanup(curl);
@@ -96,7 +86,9 @@ void GoPro::takePicture(const location *loc)
 	CURLcode res;
 	
 	curl = curl_easy_init();
-	assert(curl != NULL);
+	if(curl == NULL){
+		throw "#GoPro: takePicture cannot initialize curl! \n";
+	}
 
 	if(curl_easy_setopt(curl, CURLOPT_URL, TAKE_PIC_URL) !=  CURLE_OK) throw("##GoPro: takePicture(): curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L) != CURLE_OK) throw("takePicture: curl set write function opt error !");
@@ -107,10 +99,9 @@ void GoPro::takePicture(const location *loc)
 	#endif
 
 	res = curl_easy_perform(curl);
-
+	
 	if(res != CURLE_OK){
-
-	      fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+		throw (res);
 	}
 	//ERRO numero 7 quando o raspi nao esta conectado no GoPro (Network unreachable)
 

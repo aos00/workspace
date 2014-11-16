@@ -34,45 +34,41 @@
 using namespace std;
 
 
-GPSDevice::GPSDevice(const char *address, const int port)
+void GPSDevice::init(const char *address, const int port)
 {
-	printf("##GPSDevice: Starting GPS...\n ##GPSDevice: Checking if processor is available...\n");
+	printf("##INIT GPSDevice: Starting GPS...\n ##GPSDevice: Checking if processor is available...\n");
 	if(system(NULL)){
 		printf("##GPSDevice: Processor available! Executing commmand to start gpsd\n");
 		if(system("sudo gpsd /dev/ttyAMA0 -F /var/run/gpsd.sock") == 0){
 			printf("##GPSDevice: GPSD Daemon started...\n");
 		}else{
-			perror("##GPSDevice: Error starting GPSD!\n");
+			throw("##GPSDevice: Error starting GPSD!\n");
 		}
 	}else{
-		perror("##GPSDevice: Processor not available!\n");
+		throw("##GPSDevice: Processor not available!\n");
 	}
 
 	gps_receiver = new gpsmm(address, DEFAULT_GPSD_PORT);
 
 	printf("##GPSDevice: Checking if data is available:\n");
 	if (gps_receiver->stream(WATCH_ENABLE|WATCH_JSON) == NULL)
-        perror("##GPSDevice: GPSD daemon is not running!\n");
+        throw("##GPSDevice: GPSD daemon is not running!\n");
     else
 		printf("##GPSDevice: GPSD daemon is running!\n");
+		
+	printf("##INIT GPSDevice: GPS started successfully...\n");
 }
 
 
 int GPSDevice::read_data()
 {
 	if(!gps_receiver->waiting(5000000)){
-		#ifdef __DEBUG__
-		printf("##GPSDevice readd_data(): No data available to the client, is the gps module connected to UART?\n" );
-		#endif
+		throw("##GPSDevice readd_data(): No data available to the client, is the gps module connected to UART?\n" );
 		return 0;
 	}
 
 	if((data = gps_receiver->read()) == NULL){
-		#ifdef __DEBUG__
-		printf("##GPSDevice readd_data(): Erro ao ler os dados do gps\n");
-		printf("##GPSDevice readd_data(): Status: %i\n",data->status);
-		printf("##GPSDevice readd_data() 3Mode: %i\n",data->fix.mode);
-		#endif
+		throw("##GPSDevice readd_data(): Erro ao ler os dados do gps\n");
 		return 0;
 	}
 
@@ -91,7 +87,7 @@ int GPSDevice::read_data()
 
 		return 1;
 	}else{
-		printf("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
+		throw("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
 		return 0;
 	}
 }
