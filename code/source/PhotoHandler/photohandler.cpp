@@ -23,11 +23,16 @@ void PhotoHandler::stampCoordinates(const Photo &ph)
 		putText(image, label, Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255), 4, 5, false);
 		imshow("Foto", image);
 	}else{
-		cout << "Erro ao carregar a imagem " << endl;
+		throw("Erro ao carregar a imagem ");
 	}
 
 	waitKey(0);
 
 }
 
-PhotoHandler::PhotoHandler(){}
+
+void PhotoHandler::stampCoordinates(const vector<Photo> &photos){
+	for(unsigned int i = 0; i < photos.size(); i++){
+		stampCoordinates(photos[i]);
+    }
+}

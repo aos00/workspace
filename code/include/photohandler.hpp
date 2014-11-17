@@ -7,7 +7,7 @@
 class PhotoHandler
 {
 	public:
-        PhotoHandler();
+        void stampCoordinates(const vector<Photo>&);
 		void stampCoordinates(const Photo&);
 
 };

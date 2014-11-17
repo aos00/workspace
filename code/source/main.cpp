@@ -48,6 +48,7 @@ unsigned int time_old = 0;
 GoPro camera;
 GPSDevice gps;
 TargetArea area;
+PhotoHandler handler;
 
 int setInterrupts(void);
 int setupWiringPi(void);
@@ -74,12 +75,40 @@ void startRoutine(void) {
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
 	
-	printf("Starting routine\n");
 	if(STATUS_ROUTINE){
+		#ifdef __DEBUG__
+		printf("Stoping routine\n");
+		#endif
 		STATUS_ROUTINE = false;
-		camera.writePhotoRecords();
+		
+		try{
+			camera.writePhotoRecords();
+		}catch(const char * msg){
+			printf(msg);
+		}
+		
+		try{
+			camera.downloadAllPhotos();
+		}catch (CURLcode res){
+			fprintf(stderr, "ERRO - downloadImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+			digitalWrite(PIN_LED_CAMERA, HIGH);
+			STATUS_CAMERA = STATUS_ERROR;			
+		}catch (const char* msg){
+			perror(msg);
+			digitalWrite(PIN_LED_CAMERA, HIGH);
+			STATUS_CAMERA = STATUS_ERROR;
+		}
+		
+		try{
+			handler.stampCoordinates(camera.getPhotos());
+		}catch (const char * msg){
+			
+		}
 		
 	}else{
+		#ifdef __DEBUG__
+		printf("Starting routine\n");
+		#endif
 		STATUS_ROUTINE = true;
 	}
 	time_old = time_new;
@@ -133,7 +162,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 		STATUS_GPS = STATUS_ERROR;
 	}	
 
-	PhotoHandler handler;
+
 
 	try{
 		area.init(filepath);
@@ -154,17 +183,18 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 	
 	while(1){
 		
-		if(STATUS_ROUTINE){	
+		if(STATUS_ROUTINE){
+			printf("Status routine %d\n", STATUS_ROUTINE);
 			#ifdef __DEBUG__
 			printf("Routine running...\n");
 			#endif
 			
 			try{	
 				if(gps.read_data()){
-					digitalWrite(PIN_LED_GPS, HIGH);
+					digitalWrite(PIN_LED_GPS, LOW);
 					
 					if(area.inTarget(gps.current_location.coordinate)){
-						digitalWrite(PIN_LED_TARGET, HIGH);
+						digitalWrite(PIN_LED_TARGET, LOW);
 						gps.setLocation();
 						cout << "take picture" << endl;
 						try{
@@ -187,11 +217,12 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 						digitalWrite(PIN_LED_TARGET, HIGH);
 					}
 				}
+				delay(2000);
 			}catch (const char * msg){
 				#ifdef __DEBUG__
-				perror(msg);
+				printf(msg);
 				#endif
-				digitalWrite(PIN_LED_GPS, HIGH);
+				digitalWrite(PIN_LED_GPS, HIGH);				
 			}
 		}
 	}

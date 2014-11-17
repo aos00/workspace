@@ -63,7 +63,7 @@ void GPSDevice::init(const char *address, const int port)
 int GPSDevice::read_data()
 {
 	if(!gps_receiver->waiting(5000000)){
-		throw("##GPSDevice readd_data(): No data available to the client, is the gps module connected to UART?\n" );
+		throw("##GPSDevice read_data(): No data available to the client, is the gps module connected to UART?\n" );
 		return 0;
 	}
 

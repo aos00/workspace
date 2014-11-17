@@ -46,8 +46,8 @@ int GoPro::init(const short id, const short cammode)
 	if(curl_easy_setopt(curl, CURLOPT_URL, CHECK_AVAILABILITY_URL) !=  CURLE_OK) throw ("Take picture: curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_NOBODY, true) !=  CURLE_OK) throw("Take picture: curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true) !=  CURLE_OK) throw("Take picture: curl set url opt error !");
-	if(curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) throw("takePicture: curl set timeout opt error !");
-    	if(curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5) != CURLE_OK) throw("takePicture: curl set timeout opt error !");
+	if(curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10) != CURLE_OK) throw("takePicture: curl set timeout opt error !");
+    	if(curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10) != CURLE_OK) throw("takePicture: curl set timeout opt error !");
 
 	#ifdef __DEBUG__
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -119,7 +119,7 @@ void GoPro::takePicture(const location *loc)
 	PHOTO_ID++;
 }
 
-Photo * GoPro::downloadImage(short ID)
+bool GoPro::downloadImage(short ID)
 {
 	#ifdef __DEBUG__
 	printf("##GoPro: download image() \n");
@@ -164,21 +164,24 @@ Photo * GoPro::downloadImage(short ID)
 
 	if(res != CURLE_OK){
 
-	      fprintf(stderr, "ERRO - downloadImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+	      throw(res);
 	}
 	//Erro numero 22 quando nao foi encontrado o arquivo no servidor web da gopro
 
 	curl_easy_cleanup(curl);
 	fclose(fp);
 
-	return NULL;
+	return true;
 }
 
 bool GoPro::writePhotoRecords(){
+	printf("Writing records");
     ofstream photoInfo("./img/photo");
 
     if(!photoInfo.is_open())
-        return false;
+    {
+		throw("##GoPro: writePhotoRecords(): cannot open the file photo");
+	}
 
     #ifdef __DEBUG__
     printf("Writing photo information to file...\n");
@@ -186,7 +189,7 @@ bool GoPro::writePhotoRecords(){
 
     for(vector<Photo>::iterator it = photos.begin(); it != photos.end(); it++){
 		printf("%i,%f,%f,%f,%s\n",it->id,it->loc.coordinate.latitude,it->loc.coordinate.longitude,it->loc.altitude,it->loc.date.c_str());
-        photoInfo << std::setprecision(6) << it->id << "," << it->loc.coordinate.latitude << "," << it->loc.coordinate.longitude << "," << it->loc.altitude << "," << it->loc.date << endl;
+        photoInfo << std::setprecision(8) << it->id << "," << it->loc.coordinate.latitude << "," << it->loc.coordinate.longitude << "," << it->loc.altitude << "," << it->loc.date << endl;
         //photoInfo << "\n" << endl;
     }
 
@@ -295,8 +298,44 @@ bool GoPro::pressShutter(){
 			submode = RECORDING_OFF;
 		else
 			return false;
+	}else if(mode == PHOTO_MODE){
+		takePicture(NULL);	
 	}else{
 		return executeCommand(SHUTTER_URL);
 	}
 	return true;
+}
+
+bool GoPro::downloadAllPhotos(void){
+	
+	#ifdef __DEBUG__
+	printf("##GoPro: downloadAllPhotos(): downloading photos...\n");
+	#endif
+	
+	if(photos.size() == 0){
+	#ifdef __DEBUG__
+	printf("##GoPro: downloadAllPhotos(): no picture was taken!\n");
+	#endif
+	return false;
+	}
+	
+	
+	for(vector<Photo>::iterator it = photos.begin(); it != photos.end(); it++){
+		try{
+			if(downloadImage(it->id))
+				it->downloaded = true;
+			}catch(const char * msg){
+				throw msg;
+			}catch(CURLcode res){
+				throw res;
+			}
+    }
+    
+    return true;
+	
+}
+
+
+vector<Photo>& GoPro::getPhotos(void){
+	return photos;
 }

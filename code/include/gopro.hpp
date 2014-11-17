@@ -37,11 +37,13 @@ class GoPro
 	public:
 		int init(const short, const short); //Initializing camera
 		void takePicture(const location*); //Bater uma foto
-		Photo * downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
+		bool downloadImage(short); //Download da imagem localizada no servidor da camera a partir do id
+		bool downloadAllPhotos(void);
         bool writePhotoRecords(void);
         bool setCameraMode(const short);
         bool pressShutter(void);
         bool setNextMode(void);
+        vector<Photo>& getPhotos(void);
 };
 
 #endif
