@@ -94,14 +94,17 @@ void startRoutine(void) {
 			digitalWrite(PIN_LED_CAMERA, HIGH);
 			STATUS_CAMERA = STATUS_ERROR;			
 		}catch (const char* msg){
-			perror(msg);
+			printf(msg);
 			digitalWrite(PIN_LED_CAMERA, HIGH);
 			STATUS_CAMERA = STATUS_ERROR;
 		}
 		
 		try{
+			printf("time to stamp!!\n");
 			handler.stampCoordinates(camera.getPhotos());
+			printf("Stamped!!\n");
 		}catch (const char * msg){
+			printf(msg);
 			
 		}
 		
@@ -122,9 +125,18 @@ void driveLEDs_ALL_RED(){
 	digitalWrite(PIN_LED_ROUTINE,LOW);	
 }
 
-int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
-
-	//pthread_create(&tread_checkleds, NULL, checkLEDs, NULL);
+int main(int argc, char *argv[]){
+	if(argc == 1){
+		printf("You must pass the initial photo ID\n Exitting...");
+		return -1;
+	}	
+		
+	unsigned short id  = atoi(argv[1]);
+	
+	#ifdef __DEBUG__
+	printf("ID: %d\n",id);
+	#endif	
+	
 	try{
 		setupWiringPi();
 		
@@ -137,7 +149,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 	checkLEDs();
 	
 	try{
-		camera.init((short) 1404, PHOTO_MODE);
+		camera.init(id, PHOTO_MODE);
 		digitalWrite(PIN_LED_CAMERA, LOW);
 		STATUS_CAMERA = STATUS_OK;
 	}catch (CURLcode res){
@@ -181,6 +193,11 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 		driveLEDs_ALL_RED();
 	}
 	
+	
+	//	camera.downloadImage(1533);
+	
+	
+	
 	while(1){
 		
 		if(STATUS_ROUTINE){
@@ -200,6 +217,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 						try{
 							camera.takePicture(&gps.current_location);
 							digitalWrite(PIN_LED_CAMERA, LOW);
+							
 						}catch (CURLcode res){
 							#ifdef __DEBUG__
 							fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
@@ -217,7 +235,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 						digitalWrite(PIN_LED_TARGET, HIGH);
 					}
 				}
-				delay(2000);
+				delay(5000);
 			}catch (const char * msg){
 				#ifdef __DEBUG__
 				printf(msg);
@@ -226,6 +244,7 @@ int main(){ //obter ID inicial da foto, latitude e longitude do alvo...
 			}
 		}
 	}
+
 	return 0;
 }
 

@@ -5,7 +5,7 @@
 *	@Date: October, 2014.
 */
 
-//#define __DEBUG__
+#define __DEBUG__
 
 #include <iostream>
 #include <fstream>
@@ -23,7 +23,7 @@ const char * STOP_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%00";
 const char * VIDEO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%00";
 const char * PHOTO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%01";
 const char * BURST_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%02";
-const string GET_IMG_URL = "10.5.5.9/DCIM/100GOPRO/GOPR";
+const string GET_IMG_URL = "http://10.5.5.9:8080/DCIM/100GOPRO/GOPR";
 const string IMAGES_PATH = "/home/pi/raspi_local_repo/code/img/GOPR";
 
 
@@ -109,7 +109,7 @@ void GoPro::takePicture(const location *loc)
 
 	char num[10];
 	sprintf(num, "%hu", PHOTO_ID);
-    	string filepath = IMAGES_PATH + num;
+    	string filepath = IMAGES_PATH + num + string(".JPG");
 
 	if( loc != NULL)
 		photos.push_back(Photo(PHOTO_ID, loc, filepath, false));
@@ -122,7 +122,7 @@ void GoPro::takePicture(const location *loc)
 bool GoPro::downloadImage(short ID)
 {
 	#ifdef __DEBUG__
-	printf("##GoPro: download image() \n");
+	printf("##GoPro: download image() id %i \n", ID);
 	#endif
 	char num[10];
 	if(ID != 0)
