@@ -5,7 +5,7 @@
 //#define __LER_IMG_DISCO__
 //#define __MANIPULANDO_MAT_CONSTANTES__
 //#define __TESTE_DAS_FUNCOES_NDVI__
-//#define __USING_NDVI_VGYRM_LUT_COLORMAP__ 
+//#define __USING_NDVI_VGYRM_LUT_COLORMAP__ //em desenvolvimento
 
 #include <iostream>
 #include <stdio.h>
@@ -13,6 +13,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #define RUIDO_INFERIOR 5
+
+#define BAND_PASS_LOW_NOISE 0.3
+#define BAND_PASS_HIGH_NOISE 0.7
 
 using namespace std;
 using namespace cv;
@@ -25,6 +28,7 @@ void convertToGrayScale(Mat& src, Mat& dst);
 void colormapFromGray(Mat& src, Mat& dst);
 void colormapFromLUT(Mat& src, Mat& dst);
 void printMat(Mat& src);
+void bandPassFilter(Mat& src, Mat& dst, double min, double max);
 
 Size frameSize;
 
@@ -201,6 +205,40 @@ void colormapFromGray(Mat& src, Mat& dst){
 	cout << "Pseudo colored NDVI" << dst << endl;
 	#endif
 }
+
+
+/*
+	Band Pass filter based on this article:
+	http://publiclab.org/notes/cfastie/08-26-2014/new-ndvi-colormap
+*/
+void bandPassFilter(Mat& src, Mat& dst, double min, double max){
+	CV_Assert(src.type() == CV_32FC1);
+	CV_Assert(dst.type() == CV_32FC1);
+
+	int channels = src.channels();
+
+	int nRows = src.rows;
+	int nCols = src.cols * channels;
+
+	if (src.isContinuous())
+	{
+		nCols *= nRows;
+		nRows = 1;
+	}
+
+	int i, j;
+	float* p;
+	for (i = 0; i < nRows; ++i)
+	{
+		p = src.ptr<float>(i);
+		for (j = 0; j < nCols; ++j)
+		{
+			if ((p[j] < min) || (p[j] > max)) p[j] = -1;
+		}
+	}
+
+}
+
 
 #endif
 
@@ -804,7 +842,7 @@ void colormapFromGray(Mat& src, Mat& dst){
 
 int main(int argc, const char** argv){
 
-	Mat localImage = imread("estufa-no-wb.jpg", 1);
+	Mat localImage = imread("WIN_20141112_155714.jpg", 1);
 	//Mat infragramImage = imread("estufa.jpg", 1);
 	Mat grayndvi(frameSize, CV_8UC1);	
 
@@ -827,6 +865,9 @@ int main(int argc, const char** argv){
 
 	
 	ndviCalculation(localImage, ndvi);
+
+	bandPassFilter(ndvi, ndvi, BAND_PASS_LOW_NOISE, BAND_PASS_HIGH_NOISE);
+
 	//cout << ndvi << endl;
 	convertToGrayScale(ndvi, grayndvi);
 	//cout << grayndvi << endl;
