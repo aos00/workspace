@@ -1,5 +1,5 @@
-#define __FUNCAO_PRINCIPAL__
-//#define __TESTE_NDVI_IMG_DISCO__
+//#define __FUNCAO_PRINCIPAL__
+#define __TESTE_NDVI_IMG_DISCO__
 //#define __TESTE_DAS_FUNCOES_NDVI__
 //#define __TESTE_WEBCAM__
 //#define __LER_IMG_DISCO__
@@ -202,6 +202,9 @@ void colormapFromGray(Mat& src, Mat& dst){
 	#endif
 }
 
+#endif
+
+#ifdef __NEW_COLORMAP__
 
 /*static LUT tables for NDVI_VGYRM colormap
  ref http://publiclab.org/notes/cfastie/08-26-2014/new-ndvi-colormap
@@ -296,7 +299,7 @@ void colormapFromLUT(Mat& src, Mat& dst) {
 	CV_Assert(dst.type() == CV_8UC3);
 
 	//Might not be the most efficient way of accessing each channel
-	//but this is what we have for tdy
+	//but this is what is available for tdy
 	Mat rgb[3];
 	split(src, rgb);
 
@@ -801,8 +804,8 @@ void colormapFromGray(Mat& src, Mat& dst){
 
 int main(int argc, const char** argv){
 
-	Mat localImage = imread("foto-ajustada.png", 1);
-	Mat infragramImage = imread("foto-ajustada-infragram-basic.png", 1);
+	Mat localImage = imread("estufa-no-wb.jpg", 1);
+	//Mat infragramImage = imread("estufa.jpg", 1);
 	Mat grayndvi(frameSize, CV_8UC1);	
 
 	frameSize = localImage.size();
@@ -815,12 +818,12 @@ int main(int argc, const char** argv){
 		system("pause");
 		return -1;
 	}
-	if (!infragramImage.data)
-	{
-		cout << "Could not open infragram image" << std::endl;
-		system("pause");
-		return -1;
-	}
+	//if (!infragramImage.data)
+	//{
+	//	cout << "Could not open infragram image" << std::endl;
+	//	system("pause");
+	//	return -1;
+	//}
 
 	
 	ndviCalculation(localImage, ndvi);
@@ -830,11 +833,11 @@ int main(int argc, const char** argv){
 	////cout << "Image type:" << infragramImage
 	//cout << "Frame size:" << frameSize << endl;
 	cout << "Local ndvi " << (int) grayndvi.at<uchar>(0,0) << endl;
-	cout << "Infragram ndvi " << (int)infragramImage.at<uchar>(0,0) << endl;
+	//cout << "Infragram ndvi " << (int)infragramImage.at<uchar>(0,0) << endl;
 
 	imshow("Gray ndvi", grayndvi);
 	//waitKey(1);
-	imshow("Infragram", infragramImage);
+	//imshow("Infragram", infragramImage);
 	//imshow("Original", localImage);
 	waitKey(0);
 	//system("pause");
