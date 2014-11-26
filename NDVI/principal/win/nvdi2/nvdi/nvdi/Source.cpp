@@ -9,8 +9,10 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <vector>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 #define RUIDO_INFERIOR 5
 
@@ -873,7 +875,7 @@ int main(int argc, const char** argv){
 	//cout << grayndvi << endl;
 	////cout << "Image type:" << infragramImage
 	//cout << "Frame size:" << frameSize << endl;
-	cout << "Local ndvi " << (int) grayndvi.at<uchar>(0,0) << endl;
+	//cout << "Local ndvi " << (int) grayndvi.at<uchar>(0,0) << endl;
 	//cout << "Infragram ndvi " << (int)infragramImage.at<uchar>(0,0) << endl;
 
 	imshow("Gray ndvi", grayndvi);
@@ -881,6 +883,12 @@ int main(int argc, const char** argv){
 	//imshow("Infragram", infragramImage);
 	//imshow("Original", localImage);
 	waitKey(0);
+
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(100);
+
+	imwrite("GrayNDVI.JPG", grayndvi, compression_params);
 	//system("pause");
 	
 	destroyAllWindows();
