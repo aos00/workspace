@@ -1,0 +1,4 @@
+Mudanças a serem feitas:
+1) Passar o tratamento da interrupção para o loop principal
+2) Corrigir os estados e modos conforme a documentação
+2.1) perder o controle manual da câmera no estado Rotina
