@@ -60,7 +60,7 @@ int GoPro::init(const short id, const short cammode)
 	}
 	//ERRO numero 7 quando o raspi nao esta conectado no GoPro (Network unreachable)
 	curl_easy_cleanup(curl);
-	PHOTO_ID = id;
+	NEXT_ID = id;
 
 	#ifdef __DEBUG__
 	printf("##GoPro init(): camera initialized successfully!\n");
@@ -108,15 +108,15 @@ void GoPro::takePicture(const location *loc)
 	curl_easy_cleanup(curl);
 
 	char num[10];
-	sprintf(num, "%hu", PHOTO_ID);
+	sprintf(num, "%hu", NEXT_ID);
     	string filepath = IMAGES_PATH + num + string(".JPG");
 
 	if( loc != NULL)
-		photos.push_back(Photo(PHOTO_ID, loc, filepath, false));
+		photos.push_back(Photo(NEXT_ID, loc, filepath, false));
 	else
-		photos.push_back(Photo(PHOTO_ID, NULL, filepath, false));
+		photos.push_back(Photo(NEXT_ID, NULL, filepath, false));
 
-	PHOTO_ID++;
+	NEXT_ID++;
 }
 
 bool GoPro::downloadImage(short ID)
@@ -128,7 +128,7 @@ bool GoPro::downloadImage(short ID)
 	if(ID != 0)
 		sprintf(num, "%hu", ID);
 	else
-		sprintf(num, "%hu", PHOTO_ID);
+		sprintf(num, "%hu", NEXT_ID);
 
 	string url_tmp = GET_IMG_URL + num + string(".JPG");
 	const char * url = url_tmp.c_str();
@@ -319,6 +319,22 @@ bool GoPro::downloadAllPhotos(void){
 	return false;
 	}
 	
+	
+/*
+
+
+
+
+			try{
+			downloadImage(photos[0].id);
+				//it->downloaded = true;
+			}catch(const char * msg){
+				throw msg;
+			}catch(CURLcode res){
+				throw res;
+			}
+	
+	*/
 	
 	for(vector<Photo>::iterator it = photos.begin(); it != photos.end(); it++){
 		try{

@@ -5,11 +5,12 @@
 *	@Date: October, 2014.
 */
 
-#define __DEBUG__
+//#define __DEBUG__
 
 #include <wiringPi.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <ctime>
 #include "gopro.hpp"
 #include "gpsdevice.hpp"
 #include "photohandler.hpp"
@@ -58,7 +59,10 @@ void shutter(void){
 	time_new = millis();
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
+	int time2 = millis();
 	camera.pressShutter();
+	int time3 = millis();
+	cout << "Tempo decorridodo nextmode" << time3 - time2 << endl;
 	time_old = time_new;
 }
 
@@ -66,7 +70,10 @@ void nextMode(void) {
 	time_new = millis();
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
+	int time2 = millis();
 	camera.setNextMode();
+	int time3 = millis();
+	cout << "Tempo decorridodo nextmode" << time3 - time2 << endl;
 	time_old = time_new;
 }
 
@@ -88,7 +95,9 @@ void startRoutine(void) {
 		}
 		
 		try{
+			
 			camera.downloadAllPhotos();
+
 		}catch (CURLcode res){
 			fprintf(stderr, "ERRO - downloadImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
 			digitalWrite(PIN_LED_CAMERA, HIGH);
@@ -99,6 +108,8 @@ void startRoutine(void) {
 			STATUS_CAMERA = STATUS_ERROR;
 		}
 		
+		
+		
 		try{
 			printf("time to stamp!!\n");
 			handler.stampCoordinates(camera.getPhotos());
@@ -107,6 +118,7 @@ void startRoutine(void) {
 			printf(msg);
 			
 		}
+		
 		
 	}else{
 		#ifdef __DEBUG__
@@ -126,6 +138,10 @@ void driveLEDs_ALL_RED(){
 }
 
 int main(int argc, char *argv[]){
+	
+	int time2 = millis();
+	const clock_t begin = clock();
+	
 	if(argc == 1){
 		printf("You must pass the initial photo ID\n Exitting...");
 		return -1;
@@ -194,7 +210,10 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	//	camera.downloadImage(1533);
+	int time3 = millis();
+	clock_t diff = clock()-begin;
+	int ms = double(diff)/ CLOCKS_PER_SEC * 1000;
+	cout << "Tempo de inicializacao: " << ms  << endl;
 	
 	
 	
@@ -210,7 +229,7 @@ int main(int argc, char *argv[]){
 				if(gps.read_data()){
 					digitalWrite(PIN_LED_GPS, LOW);
 					
-					if(area.inTarget(gps.current_location.coordinate)){
+					if(1){
 						digitalWrite(PIN_LED_TARGET, LOW);
 						gps.setLocation();
 						cout << "take picture" << endl;

@@ -53,12 +53,18 @@ void PhotoHandler::stampCoordinates(const vector<Photo> &photos){
 	#ifdef __DEBUG__
 	printf("##PhotoHandler stampCoordinates(vector): Stamping coordinates.\n");
 	#endif
-	
+	double ms;
 	for(unsigned int i = 0; i < photos.size(); i++){
 		try{
+			const clock_t begin = clock();
 			stampCoordinates(photos[i]);
+				clock_t diff = clock()-begin;
+	 ms += double(diff)/ CLOCKS_PER_SEC * 1000;
+	
 		}catch (const char * msg){
 			throw msg;
 		}
     }
+    double tempomed = ms /photos.size();
+    cout << "Tempo de stamp: " << tempomed  << endl;
 }

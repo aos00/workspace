@@ -28,7 +28,7 @@ class GoPro
 	private:
 			
 		FILE *fp;
-		short PHOTO_ID;
+		short NEXT_ID;
 		vector<Photo> photos;
 		unsigned short mode;
 		unsigned short submode;
