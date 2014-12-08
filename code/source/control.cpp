@@ -5,7 +5,7 @@
 *	@Date: October, 2014.
 */
 
-//#define __DEBUG__
+#define __DEBUG__
 
 #include <wiringPi.h>
 #include <pthread.h>
@@ -35,10 +35,10 @@
 #define GPS_PORT 2947
 #define DEBOUNCING_TIME 500
 
-#define ESTADO_STANDBY 1;
-#define ESTADO_SHOOT 2;
-#define ESTADO_NEWMODE 3;
-#define ESTADO_DWL 4;
+#define ESTADO_STANDBY 1
+#define ESTADO_SHOOT 2
+#define ESTADO_NEWMODE 3
+#define ESTADO_DWL 4
 
 
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
@@ -50,7 +50,7 @@ bool STATUS_GPS = false;
 bool STATUS_IN_TARGET = false;
 bool STATUS_ROUTINE = false;
 
-int volatile ESTADO_ATUAL = 0
+int volatile ESTADO_ATUAL;
 
 const char * GPS_ADDRESS = "localhost";
 unsigned int time_new = 0;
@@ -70,13 +70,16 @@ void shutter(void){
 		return;
 	ESTADO_ATUAL = ESTADO_SHOOT;	
 	time_old = time_new;
+	#ifdef __DEBUG__
+		printf("##Interrupt Shutter ...\n");
+	#endif
 }
 
 void nextMode(void) {
 	time_new = millis();
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
-	ESTADO_ATUAL = ESTADO_CHANGEMODE;
+	ESTADO_ATUAL = ESTADO_NEWMODE;
 	time_old = time_new;
 }
 
@@ -158,18 +161,57 @@ int main(int argc, char *argv[]){
 	camera.setCameraMode(PHOTO_MODE);
 	ESTADO_ATUAL = ESTADO_STANDBY;
 	
-	for (;;){
+	while(true){
 
-		switch{
+		switch (ESTADO_ATUAL){
 		case ESTADO_STANDBY:
 			break;
 		
 		case ESTADO_SHOOT:
-			camera.pressShutter();
+				
+			if(camera.getCameraMode() == PHOTO_MODE){
+				try{	
+					if(gps.read_data()){
+						digitalWrite(PIN_LED_GPS, LOW);
+						gps.setLocation();
+						
+						try{
+							camera.pressShutter(&gps.current_location);
+							digitalWrite(PIN_LED_CAMERA, LOW);
+														
+							}catch (CURLcode res){
+								#ifdef __DEBUG__
+								fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+								#endif
+								digitalWrite(PIN_LED_CAMERA, HIGH);
+								STATUS_CAMERA = STATUS_ERROR;
+							}catch (const char* msg){
+								#ifdef __DEBUG__
+								perror(msg);
+								#endif
+								digitalWrite(PIN_LED_CAMERA, HIGH);
+								STATUS_CAMERA = STATUS_ERROR;
+							}		
+					}				
+				}catch (const char * msg){
+					
+					#ifdef __DEBUG__
+					printf(msg);
+					#endif
+					digitalWrite(PIN_LED_GPS, HIGH);
+					camera.pressShutter(NULL);
+					break;
+				}							
+				
+			}else{
+				printf("aqui1\n");
+				camera.pressShutter(NULL);			
+			}
+			
 			ESTADO_ATUAL = ESTADO_STANDBY;
 			break;
 
-		case ESTADO_CHANGEMODE:
+		case ESTADO_NEWMODE:
 			camera.setNextMode();
 			ESTADO_ATUAL = ESTADO_STANDBY;
 			break;
@@ -197,16 +239,21 @@ int main(int argc, char *argv[]){
 			}
 
 			try{
-				printf("time to stamp!!\n");
+				printf("Iniciando processo de impressão nas imagens.\n");
 				handler.stampCoordinates(camera.getPhotos());
-				printf("Stamped!!\n");
+				printf("Processo de impressão finalizado\n");
 			}
 			catch (const char * msg){
-				printf(msg);
+				//printf(msg);
+				cout << msg << endl;
 
 			}
 			ESTADO_ATUAL = ESTADO_STANDBY;
 			break;
+			
+			
+			default:
+				break;
 		}
 	}
 	return 0;

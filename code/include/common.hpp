@@ -9,6 +9,8 @@
 
 using namespace std;
 
+
+
 struct coordinates {
 	double latitude;
 	double longitude;

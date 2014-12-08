@@ -1,0 +1,29 @@
+CC=g++
+
+CCFLAGS= -Wall -I./include/
+CFLAGS= -Wall -lwiringPi -lgps -lcurl -lGeographic -lpthread `pkg-config --libs opencv`
+#CFLAGS= -Wall -I./include/
+
+executavel: control.o gpsdevice.o gopro.o photo.o photohandler.o targetarea.o
+	$(CC) $(CFLAGS) control.o gpsdevice.o gopro.o photo.o photohandler.o targetarea.o -o control.out
+
+control.o: ./source/control.cpp ./include/common.hpp
+	$(CC) $(CCFLAGS) -c ./source/control.cpp
+
+gpsdevice.o: ./source/GPSDevice/gpsdevice.cpp ./include/gpsdevice.hpp ./include/common.hpp
+	$(CC) $(CCFLAGS) -c ./source/GPSDevice/gpsdevice.cpp
+
+gopro.o: ./source/GoPro/gopro.cpp ./include/gopro.hpp ./include/common.hpp
+	$(CC) $(CCFLAGS) -c ./source/GoPro/gopro.cpp
+
+photo.o: ./source/GoPro/photo.cpp ./include/photo.hpp ./include/common.hpp
+	$(CC) $(CCFLAGS) -c ./source/GoPro/photo.cpp
+
+photohandler.o: ./source/PhotoHandler/photohandler.cpp ./include/photohandler.hpp ./include/photo.hpp
+	$(CC) $(CCFLAGS) -c ./source/PhotoHandler/photohandler.cpp
+
+targetarea.o: ./source/TargetArea/targetarea.cpp ./include/targetarea.hpp ./include/common.hpp
+	$(CC) $(CCFLAGS) -c ./source/TargetArea/targetarea.cpp
+
+clean:
+	rm -rf *.o executavel

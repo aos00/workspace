@@ -30,9 +30,9 @@ class GoPro
 		FILE *fp;
 		short NEXT_ID;
 		vector<Photo> photos;
+		bool executeCommand(const char*);
 		unsigned short mode;
 		unsigned short submode;
-		bool executeCommand(const char*);
 
 	public:
 		int init(const short, const short); //Initializing camera
@@ -41,9 +41,11 @@ class GoPro
 		bool downloadAllPhotos(void);
         bool writePhotoRecords(void);
         bool setCameraMode(const short);
-        bool pressShutter(void);
+        bool pressShutter(const location*);
         bool setNextMode(void);
         vector<Photo>& getPhotos(void);
+        short getCameraMode();
+        bool incrementPhotosVector(const location*);
 };
 
 #endif

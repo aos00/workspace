@@ -87,8 +87,18 @@ int GPSDevice::read_data()
 
 		return 1;
 	}else{
-		throw("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
-		return 0;
+		int n = 10;
+		while(n>=0){
+			data = gps_receiver->read();
+			if(!(std::isnan(data->fix.latitude) || std::isnan(data->fix.longitude)))
+				break;
+		}
+		if(n < 0){
+			throw("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
+			return 0;
+		}else{
+			return 1;
+		}
 	}
 }
 

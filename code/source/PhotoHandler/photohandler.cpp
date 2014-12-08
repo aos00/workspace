@@ -26,7 +26,7 @@ void PhotoHandler::stampCoordinates(const Photo &ph)
 	sprintf(alt, "%f", ph.loc.altitude);
 	string label = string("PHOTO INFO: Latitude: ") + lat + string(", Longitude: ") + longt + string(", Altitude: ") + alt;
 	
-	printf("filepath %s\n\n\n",ph.filepath.c_str());
+	printf("filepath %s\n",ph.filepath.c_str());
 	
 	image = imread(ph.filepath, CV_LOAD_IMAGE_COLOR);
 
@@ -37,10 +37,9 @@ void PhotoHandler::stampCoordinates(const Photo &ph)
 		params.push_back(100);
 		imwrite(ph.filepath, image, params);
 		//imshow("Foto", image);
-		printf("feito\n\n\n");
+		printf("feito\n\n");
 	}else{
-		printf("erro\n\n\n");
-		throw("Erro ao carregar a imagem ");
+		throw "Erro ao carregar a imagem ";
 	}
 
 	//waitKey(0);
@@ -53,18 +52,11 @@ void PhotoHandler::stampCoordinates(const vector<Photo> &photos){
 	#ifdef __DEBUG__
 	printf("##PhotoHandler stampCoordinates(vector): Stamping coordinates.\n");
 	#endif
-	double ms;
 	for(unsigned int i = 0; i < photos.size(); i++){
 		try{
-			const clock_t begin = clock();
-			stampCoordinates(photos[i]);
-				clock_t diff = clock()-begin;
-	 ms += double(diff)/ CLOCKS_PER_SEC * 1000;
-	
+			stampCoordinates(photos[i]);	
 		}catch (const char * msg){
 			throw msg;
 		}
     }
-    double tempomed = ms /photos.size();
-    cout << "Tempo de stamp: " << tempomed  << endl;
 }

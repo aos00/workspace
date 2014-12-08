@@ -23,7 +23,7 @@ const char * STOP_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%00";
 const char * VIDEO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%00";
 const char * PHOTO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%01";
 const char * BURST_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%02";
-const char * BURST_RATE_URL = "10.5.5.9/camera/BU?t=goprohero&p=%02";
+const char * BURST_RATE_URL = "10.5.5.9/camera/BU?t=goprohero&p=%00";
 const string GET_IMG_URL = "http://10.5.5.9:8080/DCIM/100GOPRO/GOPR";
 const string IMAGES_PATH = "/home/pi/raspi_local_repo/code/img/GOPR";
 
@@ -108,16 +108,24 @@ void GoPro::takePicture(const location *loc)
 
 	curl_easy_cleanup(curl);
 
+	
+
+	incrementPhotosVector(loc);
+}
+
+bool GoPro::incrementPhotosVector(const location *loc){
 	char num[10];
 	sprintf(num, "%hu", NEXT_ID);
-    	string filepath = IMAGES_PATH + num + string(".JPG");
-
+	
+    string filepath = IMAGES_PATH + num + string(".JPG");
+    	
 	if( loc != NULL)
 		photos.push_back(Photo(NEXT_ID, loc, filepath, false));
 	else
 		photos.push_back(Photo(NEXT_ID, NULL, filepath, false));
 
 	NEXT_ID++;
+	return true;
 }
 
 bool GoPro::downloadImage(short ID)
@@ -176,12 +184,12 @@ bool GoPro::downloadImage(short ID)
 }
 
 bool GoPro::writePhotoRecords(){
-	printf("Writing records");
+	printf("#GoPro: Writing records\n");
     ofstream photoInfo("./img/photo");
 
     if(!photoInfo.is_open())
     {
-		throw("##GoPro: writePhotoRecords(): cannot open the file photo");
+		throw("##GoPro: writePhotoRecords(): cannot open the file photo\n");
 	}
 
     #ifdef __DEBUG__
@@ -284,7 +292,7 @@ bool GoPro::executeCommand(const char* URL)
 	return true;
 }
 
-bool GoPro::pressShutter(){
+bool GoPro::pressShutter(const location *loc){
 	#ifdef __DEBUG__
     printf("##GoPro: press shutter\n");
     #endif
@@ -295,14 +303,20 @@ bool GoPro::pressShutter(){
 		else
 			return false;
 	}else if (mode == VIDEO_MODE && submode == RECORDING_ON){  
-		if(executeCommand(STOP_URL))
+		if(executeCommand(STOP_URL)){
 			submode = RECORDING_OFF;
+			NEXT_ID++;
+		}
 		else
 			return false;
 	}else if(mode == PHOTO_MODE){
-		takePicture(NULL);	
+		takePicture(loc);	
+	}else if(mode == BURST_MODE){
+		executeCommand(SHUTTER_URL);
+		for(int i=0; i<3; i++)
+			incrementPhotosVector(loc);
 	}else{
-		return executeCommand(SHUTTER_URL);
+		executeCommand(SHUTTER_URL);
 	}
 	return true;
 }
@@ -320,32 +334,17 @@ bool GoPro::downloadAllPhotos(void){
 	return false;
 	}
 	
-	
-/*
-
-
-
-
-			try{
-			downloadImage(photos[0].id);
-				//it->downloaded = true;
-			}catch(const char * msg){
-				throw msg;
-			}catch(CURLcode res){
-				throw res;
-			}
-	
-	*/
-	
 	for(vector<Photo>::iterator it = photos.begin(); it != photos.end(); it++){
-		try{
-			if(downloadImage(it->id))
-				it->downloaded = true;
-			}catch(const char * msg){
-				throw msg;
-			}catch(CURLcode res){
-				throw res;
-			}
+		if(it->downloaded == false){
+			try{
+				if(downloadImage(it->id))
+					it->downloaded = true;
+				}catch(const char * msg){
+					throw msg;
+				}catch(CURLcode res){
+					throw res;
+				}
+		}
     }
     
     return true;
@@ -355,4 +354,9 @@ bool GoPro::downloadAllPhotos(void){
 
 vector<Photo>& GoPro::getPhotos(void){
 	return photos;
+}
+
+
+short GoPro::getCameraMode(){
+	return mode;
 }
