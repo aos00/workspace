@@ -23,6 +23,7 @@ const char * STOP_URL = "10.5.5.9/bacpac/SH?t=goprohero&p=%00";
 const char * VIDEO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%00";
 const char * PHOTO_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%01";
 const char * BURST_MODE_URL = "10.5.5.9/camera/CM?t=goprohero&p=%02";
+const char * BURST_RATE_URL = "10.5.5.9/camera/BU?t=goprohero&p=%02";
 const string GET_IMG_URL = "http://10.5.5.9:8080/DCIM/100GOPRO/GOPR";
 const string IMAGES_PATH = "/home/pi/raspi_local_repo/code/img/GOPR";
 
@@ -228,7 +229,7 @@ bool GoPro::setCameraMode(const short new_mode){
 		else
 			return false;
     }else if(new_mode == BURST_MODE){
-        if(executeCommand(BURST_MODE_URL))
+        if(executeCommand(BURST_MODE_URL) && executeCommand(BURST_RATE_URL))
 			mode = new_mode;
 		else
 			return false;

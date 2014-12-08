@@ -1,11 +1,12 @@
 //#define __FUNCAO_PRINCIPAL__
-#define __TESTE_NDVI_IMG_DISCO__
+//#define __TESTE_NDVI_IMG_DISCO__
 //#define __TESTE_DAS_FUNCOES_NDVI__
 //#define __TESTE_WEBCAM__
 //#define __LER_IMG_DISCO__
 //#define __MANIPULANDO_MAT_CONSTANTES__
 //#define __TESTE_DAS_FUNCOES_NDVI__
 //#define __USING_NDVI_VGYRM_LUT_COLORMAP__ //em desenvolvimento
+#define __FINAL__
 
 #include <iostream>
 #include <stdio.h>
@@ -38,11 +39,11 @@ Size frameSize;
 
 
 /* The following functions implement the NDVI and Pseudocolor calculations
-	NDVI: (nir-vis)/(nir+vis)
-	PseudoColdors:
-		Blue channel: ((255-ndvi)-128)*2
-		Red Channel: (ndvi-128)*2
-		Green Channel: (25-(bluechannel+redchannel)
+NDVI: (nir-vis)/(nir+vis)
+PseudoColdors:
+Blue channel: ((255-ndvi)-128)*2
+Red Channel: (ndvi-128)*2
+Green Channel: (25-(bluechannel+redchannel)
 */
 void ndviCalculation(Mat& src, Mat& dst){
 
@@ -62,25 +63,25 @@ void ndviCalculation(Mat& src, Mat& dst){
 
 
 	split(src, rgb);
-	
+
 	////Adicionar e subtrair os canais
 	add(rgb[2], rgb[0], soma, noArray(), CV_32F);
-	
+
 	antiLowerNoise(soma); // Evitar ruido de baixa intensidade;
-	
+
 	subtract(rgb[2], rgb[0], subtracao, noArray(), CV_32F); // fazer subtracao
-	
+
 	////Dividir os canais
 	divide(subtracao, soma, dst, 1, CV_32F);
-	
-	#ifdef _DEBUG_NDVI_CALC_
+
+#ifdef _DEBUG_NDVI_CALC_
 	cout << "NDVI Calculation: Canal Vermelho: " << (int)rgb[2].at<uchar>(30, 30) << endl;
 	cout << "NDVI Calculation: Canal Azul: " << (int)rgb[0].at<uchar>(30, 30) << endl;
 
 	cout << "tipo" << dst.type() << endl;
 	//dst = ((rgb[2] - rgb[0]) / (rgb[2] + rgb[0]));
 	cout << "tipo" << dst.type() << endl;
-	#endif
+#endif
 
 }
 
@@ -192,26 +193,26 @@ void colormapFromGray(Mat& src, Mat& dst){
 	Mat ndviPseudoColored[3];
 
 	ndviPseudoColored[2] = (src - 128) * 2; //Canal do vermelho
-	
+
 
 	ndviPseudoColored[0] = ((255 - src) - 128) * 2; //Canal do azul
 
 	ndviPseudoColored[1] = 255 - (ndviPseudoColored[2] + ndviPseudoColored[0]);
 
 	merge(ndviPseudoColored, 3, dst);
-	
 
-	#ifdef _DEBUG_pseudocolor_
+
+#ifdef _DEBUG_pseudocolor_
 	cout << "ndviPseudoColored[2]" << ndviPseudoColored[2] << endl;
 	cout << "ndviPseudoColored[0]" << ndviPseudoColored[0] << endl;
 	cout << "Pseudo colored NDVI" << dst << endl;
-	#endif
+#endif
 }
 
 
 /*
-	Band Pass filter based on this article:
-	http://publiclab.org/notes/cfastie/08-26-2014/new-ndvi-colormap
+Band Pass filter based on this article:
+http://publiclab.org/notes/cfastie/08-26-2014/new-ndvi-colormap
 */
 void bandPassFilter(Mat& src, Mat& dst, double min, double max){
 	CV_Assert(src.type() == CV_32FC1);
@@ -247,107 +248,107 @@ void bandPassFilter(Mat& src, Mat& dst, double min, double max){
 #ifdef __NEW_COLORMAP__
 
 /*static LUT tables for NDVI_VGYRM colormap
- ref http://publiclab.org/notes/cfastie/08-26-2014/new-ndvi-colormap
+ref http://publiclab.org/notes/cfastie/08-26-2014/new-ndvi-colormap
 */
 
-	static const unsigned short red_LUT[256] =
-	{
-		255, 250, 246, 242, 238, 233, 229, 225, 221, 216,
-		212, 208, 204, 200, 195, 191, 187, 183, 178, 174,
-		170, 166, 161, 157, 153, 149, 145, 140, 136, 132,
-		128, 123, 119, 115, 111, 106, 102, 98, 94, 90,
-		85, 81, 77, 73, 68, 64, 60, 56, 52, 56,
-		60, 64, 68, 73, 77, 81, 85, 90, 94, 98,
-		102, 106, 111, 115, 119, 123, 128, 132, 136, 140,
-		145, 149, 153, 157, 161, 166, 170, 174, 178, 183,
-		187, 191, 195, 200, 204, 208, 212, 216, 221, 225,
-		229, 233, 238, 242, 246, 250, 255, 250, 245, 240,
-		235, 230, 225, 220, 215, 210, 205, 200, 195, 190,
-		185, 180, 175, 170, 165, 160, 155, 151, 146, 141,
-		136, 131, 126, 121, 116, 111, 106, 101, 96, 91,
-		86, 81, 76, 71, 66, 61, 56, 66, 77, 87,
-		98, 108, 119, 129, 140, 131, 122, 113, 105, 96,
-		87, 78, 70, 61, 52, 43, 35, 26, 17, 8,
-		0, 7, 15, 23, 31, 39, 47, 55, 63, 71,
-		79, 87, 95, 103, 111, 119, 127, 135, 143, 151,
-		159, 167, 175, 183, 191, 199, 207, 215, 223, 231,
-		239, 247, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255
-	};
+static const unsigned short red_LUT[256] =
+{
+	255, 250, 246, 242, 238, 233, 229, 225, 221, 216,
+	212, 208, 204, 200, 195, 191, 187, 183, 178, 174,
+	170, 166, 161, 157, 153, 149, 145, 140, 136, 132,
+	128, 123, 119, 115, 111, 106, 102, 98, 94, 90,
+	85, 81, 77, 73, 68, 64, 60, 56, 52, 56,
+	60, 64, 68, 73, 77, 81, 85, 90, 94, 98,
+	102, 106, 111, 115, 119, 123, 128, 132, 136, 140,
+	145, 149, 153, 157, 161, 166, 170, 174, 178, 183,
+	187, 191, 195, 200, 204, 208, 212, 216, 221, 225,
+	229, 233, 238, 242, 246, 250, 255, 250, 245, 240,
+	235, 230, 225, 220, 215, 210, 205, 200, 195, 190,
+	185, 180, 175, 170, 165, 160, 155, 151, 146, 141,
+	136, 131, 126, 121, 116, 111, 106, 101, 96, 91,
+	86, 81, 76, 71, 66, 61, 56, 66, 77, 87,
+	98, 108, 119, 129, 140, 131, 122, 113, 105, 96,
+	87, 78, 70, 61, 52, 43, 35, 26, 17, 8,
+	0, 7, 15, 23, 31, 39, 47, 55, 63, 71,
+	79, 87, 95, 103, 111, 119, 127, 135, 143, 151,
+	159, 167, 175, 183, 191, 199, 207, 215, 223, 231,
+	239, 247, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255
+};
 
 
-	static const unsigned short green_LUT[256] =
-	{
-		255, 250, 246, 242, 238, 233, 229, 225, 221, 216,
-		212, 208, 204, 200, 195, 191, 187, 183, 178, 174,
-		170, 166, 161, 157, 153, 149, 145, 140, 136, 132,
-		128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85,
-		81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73,
-		77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123,
-		128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170,
-		174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216,
-		221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245,
-		240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190,
-		185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136,
-		131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76,
-		71, 66, 61, 56, 66, 77, 87, 98, 108, 119, 129, 140, 147,
-		154, 161, 168, 175, 183, 190, 197, 204, 211, 219, 226,
-		233, 240, 247, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 249, 244, 239, 233, 228, 223, 217, 212,
-		207, 201, 196, 191, 185, 180, 175, 170, 164, 159, 154,
-		148, 143, 138, 132, 127, 122, 116, 111, 106, 100, 95,
-		90, 85, 79, 74, 69, 63, 58, 53, 47, 42, 37, 31, 26, 21,
-		15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	};
+static const unsigned short green_LUT[256] =
+{
+	255, 250, 246, 242, 238, 233, 229, 225, 221, 216,
+	212, 208, 204, 200, 195, 191, 187, 183, 178, 174,
+	170, 166, 161, 157, 153, 149, 145, 140, 136, 132,
+	128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85,
+	81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73,
+	77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123,
+	128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170,
+	174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216,
+	221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245,
+	240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190,
+	185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136,
+	131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76,
+	71, 66, 61, 56, 66, 77, 87, 98, 108, 119, 129, 140, 147,
+	154, 161, 168, 175, 183, 190, 197, 204, 211, 219, 226,
+	233, 240, 247, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+	255, 255, 255, 249, 244, 239, 233, 228, 223, 217, 212,
+	207, 201, 196, 191, 185, 180, 175, 170, 164, 159, 154,
+	148, 143, 138, 132, 127, 122, 116, 111, 106, 100, 95,
+	90, 85, 79, 74, 69, 63, 58, 53, 47, 42, 37, 31, 26, 21,
+	15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
 
-	static const unsigned short blue_LUT[256] =
-	{
-		255, 250, 246, 242, 238, 233, 229, 225, 221, 216,
-		212, 208, 204, 200, 195, 191, 187, 183, 178, 174,
-		170, 166, 161, 157, 153, 149, 145, 140, 136, 132,
-		128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85,
-		81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73,
-		77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123,
-		128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170,
-		174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216,
-		221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245,
-		240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190,
-		185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136,
-		131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76,
-		71, 66, 61, 56, 80, 105, 130, 155, 180, 205, 230, 255,
-		239, 223, 207, 191, 175, 159, 143, 127, 111, 95, 79, 63,
-		47, 31, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 31, 47, 63, 79, 95, 111,
-		127, 143, 159, 175, 191, 207, 223, 239
-	};
+static const unsigned short blue_LUT[256] =
+{
+	255, 250, 246, 242, 238, 233, 229, 225, 221, 216,
+	212, 208, 204, 200, 195, 191, 187, 183, 178, 174,
+	170, 166, 161, 157, 153, 149, 145, 140, 136, 132,
+	128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85,
+	81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73,
+	77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123,
+	128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170,
+	174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216,
+	221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245,
+	240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190,
+	185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136,
+	131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76,
+	71, 66, 61, 56, 80, 105, 130, 155, 180, 205, 230, 255,
+	239, 223, 207, 191, 175, 159, 143, 127, 111, 95, 79, 63,
+	47, 31, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 31, 47, 63, 79, 95, 111,
+	127, 143, 159, 175, 191, 207, 223, 239
+};
 
 
-	/* Em Desenvolvimento*/
-	/*
+/* Em Desenvolvimento*/
+/*
 void colormapFromLUT(Mat& src, Mat& dst) {
-	CV_Assert(src.type() == CV_8UC1);
-	CV_Assert(dst.type() == CV_8UC3);
+CV_Assert(src.type() == CV_8UC1);
+CV_Assert(dst.type() == CV_8UC3);
 
-	//Might not be the most efficient way of accessing each channel
-	//but this is what is available for tdy
-	Mat rgb[3];
-	split(src, rgb);
+//Might not be the most efficient way of accessing each channel
+//but this is what is available for tdy
+Mat rgb[3];
+split(src, rgb);
 
-	for (short i = 0; i < 256; i++){
-		rgb[0].at(Point(i)) = blue_LUT[rgb[0][i]];
-		rgb[1][i] = green_LUT[rgb[1][i]];
-		rgb[2][i] = red_LUT[rgb[2][i]];
-	}
+for (short i = 0; i < 256; i++){
+rgb[0].at(Point(i)) = blue_LUT[rgb[0][i]];
+rgb[1][i] = green_LUT[rgb[1][i]];
+rgb[2][i] = red_LUT[rgb[2][i]];
+}
 }
 */
 
@@ -359,54 +360,54 @@ void colormapFromLUT(Mat& src, Mat& dst) {
 
 int main(int argc, const char** argv){
 	short limiteInferior = 5;
-	Mat frame;	
+	Mat frame;
 
 	VideoCapture capture(CV_CAP_ANY);
 
 	CV_Assert(capture.isOpened());
 
-		cout << "In capure ..." << endl;
-			
-		frameSize = frame.size();
+	cout << "In capure ..." << endl;
 
-		Mat gray(frameSize, CV_8UC1);
-		Mat ndvi(frameSize, CV_32FC1);
+	frameSize = frame.size();
 
-		for (;;){
-			capture >> frame;
-			
+	Mat gray(frameSize, CV_8UC1);
+	Mat ndvi(frameSize, CV_32FC1);
 
-			//Mat rgb[3];
-			//split(frame, rgb);
+	for (;;){
+		capture >> frame;
 
-			//imshow("Vermelho", rgb[2]);
 
-			
-			imshow("Frame", frame);
+		//Mat rgb[3];
+		//split(frame, rgb);
 
-			//cout << frame << endl;
-			//
-			ndviCalculation(frame, ndvi); //Calculate NDVI
+		//imshow("Vermelho", rgb[2]);
 
-			//imshow("NDVI", ndvi);
 
-			convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
-		
-			imshow("gray", gray);
+		imshow("Frame", frame);
 
-			colormapFromGray(gray, frame);			
+		//cout << frame << endl;
+		//
+		ndviCalculation(frame, ndvi); //Calculate NDVI
 
-			imshow("False color", frame);
-				
-			if (waitKey(10) >= 0)
-				break;
-		}
-		waitKey(0);
+		//imshow("NDVI", ndvi);
 
-		//}
-		//cvReleaseCapture(&capture);
-		//cvDestroyWindow("NDVI");
-		destroyAllWindows();
+		convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
+
+		imshow("gray", gray);
+
+		colormapFromGray(gray, frame);
+
+		imshow("False color", frame);
+
+		if (waitKey(10) >= 0)
+			break;
+	}
+	waitKey(0);
+
+	//}
+	//cvReleaseCapture(&capture);
+	//cvDestroyWindow("NDVI");
+	destroyAllWindows();
 
 
 	return 0;
@@ -442,7 +443,7 @@ int main(int argc, const char** argv){
 	cout << "tela" << red << endl << endl;*/
 
 	iterate(red);
-	cout << "red" << red << endl << endl; 
+	cout << "red" << red << endl << endl;
 	imshow("matriz", red);
 
 	system("pause");
@@ -487,9 +488,9 @@ Mat& iterate(Mat& I)
 #ifdef __LER_IMG_DISCO__
 
 //----------------------------LER IMAGEM DO DISCO--------------------------------------------------
-			
 
-	int main(int argc, const char** argv){
+
+int main(int argc, const char** argv){
 
 	Mat imagem = Mat::zeros(48, 48, CV_32FC3);
 	imagem = imread("imagem.jpg", 1);
@@ -511,7 +512,7 @@ Mat& iterate(Mat& I)
 	cout << "Imagem" << ndvi << endl << endl;
 	system("pause");
 	return 0;
-	}
+}
 
 #endif
 
@@ -542,8 +543,8 @@ int main(int argc, const char** argv){
 			if (waitKey(10) >= 0)
 				break;
 		}
-			waitKey(0);
-		
+		waitKey(0);
+
 	}
 	return 0;
 }
@@ -556,11 +557,11 @@ int main(int argc, const char** argv){
 //----------------------TESTE DAS FUNÇÕES DE CALCULO DO NDVI --------------------------------
 
 int main(int argc, const char** argv){
-	
+
 	/*
 	*	Generating static frames
 	*/
-	Mat red(2,2, CV_8U, Scalar(200));
+	Mat red(2, 2, CV_8U, Scalar(200));
 	Mat blue(red.size(), CV_8U, Scalar(100));
 	Mat green(red.size(), CV_8U, Scalar(50));
 
@@ -573,11 +574,11 @@ int main(int argc, const char** argv){
 	frame[0] = blue;
 	frame[1] = green;
 	frame[2] = red;
-	
+
 	Mat mergedFrame;
 	merge(frame, 3, mergedFrame);
 
-	
+
 	cout << mergedFrame << endl;
 
 	imshow("Frame generated", mergedFrame);
@@ -587,7 +588,7 @@ int main(int argc, const char** argv){
 	/*
 	*	End of frame generation
 	*/
-		
+
 	Mat ndvi(red.size(), CV_32FC1);
 
 	ndviCalculation(mergedFrame, ndvi); //Calculate NDVI
@@ -596,10 +597,10 @@ int main(int argc, const char** argv){
 	cout << "GRAY SCALE" << ndvi << endl;
 
 	//colormapFromGray(ndvi, ndvi);
-		
+
 	waitKey(0);
 	//system("pause");
-	
+
 
 
 	return 0;
@@ -607,7 +608,7 @@ int main(int argc, const char** argv){
 
 void printMat(Mat& src){
 	cout << endl << "------------- PRINT MATRIX ---------" << endl;
-	
+
 	CV_Assert(src.isContinuous());
 
 	short nChannels = src.channels();
@@ -620,21 +621,21 @@ void printMat(Mat& src){
 	short i, j;
 	uchar* p;
 
-	short channel =0;
-	p = src.ptr<uchar>(0);	
+	short channel = 0;
+	p = src.ptr<uchar>(0);
 
 	while (channel < nChannels){
 		cout << endl << "Imprimindo canal " << channel << endl;
 		j = 0;
 		short n = 0;
-		for (i = 0 ; i < nRows*nCols; i++){
+		for (i = 0; i < nRows*nCols; i++){
 			j = i * 3 + channel;
 			if (n >= nCols){
 				n = 0;
 				cout << endl;
 			}
-				cout << " " << (int)p[j];
-				n++;
+			cout << " " << (int)p[j];
+			n++;
 		}
 		channel++;
 	}
@@ -695,27 +696,27 @@ void ndviCalculation(Mat& src, Mat& dst){
 	cout << "NVDI SOMA" << soma << endl;
 
 	antiLowerNoise(soma); // Evitar ruido de baixa intensidade;
-	 
+
 	subtract(rgb[2], rgb[0], subtracao, noArray(), CV_32F); // fazer subtracao
 	cout << "NVDI SUBTRACAO" << subtracao << endl;
 
 	//Dividir os canais
 	divide(subtracao, soma, dst, 1, CV_32F);
-	cout << "NVDI DIVISAO" << dst << endl;	
+	cout << "NVDI DIVISAO" << dst << endl;
 
 }
 
 void convertToGrayScale(Mat& src, Mat& dst){
-	
+
 	add(src, 1, src, noArray(), CV_32F);
 	cout << "convertToGrayScale - add fn:" << src << endl;
 	multiply(src, 127, src, 1.0, CV_32F);
 	cout << "convertToGrayScale - multiply fn:" << src << endl;
 	src.convertTo(dst, CV_8U);
 	cout << "convertToGrayScale - after conversion to float:" << src << endl;
-	
 
-	
+
+
 }
 
 void antiLowerNoise(Mat& I){
@@ -830,7 +831,7 @@ void colormapFromGray(Mat& src, Mat& dst){
 
 	merge(ndviPseudoColored, 3, dst);
 	cout << "Pseudo colored NDVI" << dst << endl;
-	
+
 
 
 }
@@ -844,9 +845,9 @@ void colormapFromGray(Mat& src, Mat& dst){
 
 int main(int argc, const char** argv){
 
-	Mat localImage = imread("WIN_20141112_155714.jpg", 1);
+	Mat localImage = imread("imagem9.png", 1);
 	//Mat infragramImage = imread("estufa.jpg", 1);
-	Mat grayndvi(frameSize, CV_8UC1);	
+	Mat grayndvi(frameSize, CV_8UC1);
 
 	frameSize = localImage.size();
 
@@ -865,7 +866,7 @@ int main(int argc, const char** argv){
 	//	return -1;
 	//}
 
-	
+
 	ndviCalculation(localImage, ndvi);
 
 	bandPassFilter(ndvi, ndvi, BAND_PASS_LOW_NOISE, BAND_PASS_HIGH_NOISE);
@@ -888,9 +889,9 @@ int main(int argc, const char** argv){
 	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
 	compression_params.push_back(100);
 
-	imwrite("GrayNDVI.JPG", grayndvi, compression_params);
+	imwrite("imagem9-posproc.JPG", grayndvi, compression_params);
 	//system("pause");
-	
+
 	destroyAllWindows();
 	return 0;
 }
@@ -904,5 +905,44 @@ int main(){
 	system("pause");
 	return 0;
 }
+
+#endif
+
+
+#ifdef __FINAL__
+
+int main(int argc, const char** argv){
+	VideoCapture capture;
+	Mat frame;
+
+	capture.open(CV_CAP_ANY);
+
+	if (!capture.isOpened())
+	{
+		cout << "Nenhuma camera detectada" << endl;
+		return -1;
+
+	}
+
+	capture >> frame;
+	frameSize = frame.size();
+
+	Mat grayndvi(frameSize, CV_8UC1);
+	Mat ndvi(frameSize, CV_32FC1);
+
+	ndviCalculation(frame, ndvi);
+	bandPassFilter(ndvi, ndvi, BAND_PASS_LOW_NOISE, BAND_PASS_HIGH_NOISE);
+	convertToGrayScale(ndvi, grayndvi);
+
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(100);
+	imwrite("frame.JPG", grayndvi, compression_params);
+
+	return 1;
+}
+
+
+
 
 #endif
