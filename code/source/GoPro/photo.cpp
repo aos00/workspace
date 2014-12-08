@@ -12,6 +12,7 @@
 Photo::Photo(short ID, const location *locat, string path, bool dl) {
 	id = ID;
 	downloaded = dl;
+	stamped = false;
 	filepath = path;
 	if(locat != NULL){
 	    /*

@@ -47,16 +47,19 @@ void PhotoHandler::stampCoordinates(const Photo &ph)
 }
 
 
-void PhotoHandler::stampCoordinates(const vector<Photo> &photos){
+void PhotoHandler::stampCoordinates(vector<Photo> &photos){
 	
 	#ifdef __DEBUG__
 	printf("##PhotoHandler stampCoordinates(vector): Stamping coordinates.\n");
 	#endif
 	for(unsigned int i = 0; i < photos.size(); i++){
-		try{
-			stampCoordinates(photos[i]);	
-		}catch (const char * msg){
-			throw msg;
+		if(photos[i].stamped == false){
+			try{
+				stampCoordinates(photos[i]);
+				photos[i].stamped = true;	
+			}catch (const char * msg){
+				throw msg;
+			}
 		}
     }
 }

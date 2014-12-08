@@ -183,7 +183,19 @@ int main(int argc, char *argv[]){
 	try{
 		gps.init(GPS_ADDRESS, GPS_PORT);
 		digitalWrite(PIN_LED_GPS, LOW);
-		STATUS_GPS = STATUS_OK;
+		try{
+			int n = 15;
+			while(n>=0){
+				gps.read_data();
+				n--;
+			}
+			STATUS_GPS = STATUS_OK;
+		}catch (const char * msg){
+		cout << msg << endl;
+		digitalWrite(PIN_LED_GPS, HIGH);
+		STATUS_GPS = STATUS_ERROR;
+		}
+		
 	}catch (const char * msg){
 		perror(msg);
 		digitalWrite(PIN_LED_GPS, HIGH);

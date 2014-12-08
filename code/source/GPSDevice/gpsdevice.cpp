@@ -62,17 +62,16 @@ void GPSDevice::init(const char *address, const int port)
 
 int GPSDevice::read_data()
 {
-	if(!gps_receiver->waiting(5000000)){
-		throw("##GPSDevice read_data(): No data available to the client, is the gps module connected to UART?\n" );
+	if(!gps_receiver->waiting(2000000)){
+		cout << "aquiiii" << endl;
+		throw"##GPSDevice read_data(): No data available to the client, is the gps module connected to UART?\n" ;
 		return 0;
 	}
-
+	cout << "aquiiii22" << endl;
 	if((data = gps_receiver->read()) == NULL){
-		throw("##GPSDevice readd_data(): Erro ao ler os dados do gps\n");
+		throw"##GPSDevice readd_data(): Erro ao ler os dados do gps\n";
 		return 0;
 	}
-
-
 
 	if(!(std::isnan(data->fix.latitude) || std::isnan(data->fix.longitude))){
 		current_location.coordinate.latitude = data->fix.latitude;
@@ -87,18 +86,9 @@ int GPSDevice::read_data()
 
 		return 1;
 	}else{
-		int n = 10;
-		while(n>=0){
-			data = gps_receiver->read();
-			if(!(std::isnan(data->fix.latitude) || std::isnan(data->fix.longitude)))
-				break;
-		}
-		if(n < 0){
-			throw("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
-			return 0;
-		}else{
-			return 1;
-		}
+		printf("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
+		return 0;
+	
 	}
 }
 

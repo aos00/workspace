@@ -26,4 +26,4 @@ targetarea.o: ./source/TargetArea/targetarea.cpp ./include/targetarea.hpp ./incl
 	$(CC) $(CCFLAGS) -c ./source/TargetArea/targetarea.cpp
 
 clean:
-	rm -rf *.o executavel
+	rm -rf *.o control.out

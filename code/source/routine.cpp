@@ -1,3 +1,4 @@
+
 /*
 *	Main Source File.
 *	@Author: ANDERSON OLIVEIRA SOUSA.
@@ -37,8 +38,8 @@
 
 #define ESTADO_STANDBY 1
 #define ESTADO_SHOOT 2
-#define ESTADO_NEWMODE 3
-#define ESTADO_DWL 4
+#define ESTADO_DWL 3
+#define ESTADO_ROUTINE 4
 
 
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
@@ -158,11 +159,16 @@ int main(int argc, char *argv[]){
 			n--;
 			cout<< "aquii" << endl;
 		}
+		digitalWrite(PIN_LED_GPS, LOW);
+		STATUS_GPS = STATUS_OK;
 	}catch(const char * msg){
 		perror(msg);
 		digitalWrite(PIN_LED_GPS, HIGH);
 		STATUS_GPS = STATUS_ERROR;
 	}
+	
+	digitalWrite(PIN_LED_GPS, HIGH);
+		STATUS_GPS = STATUS_ERROR;
 	
 	try{
 		setInterrupts();
@@ -181,98 +187,14 @@ int main(int argc, char *argv[]){
 		switch (ESTADO_ATUAL){
 		case ESTADO_STANDBY:
 			break;
+			
+		case ESTADO_ROUTINE:
+			printf("Status routine %d\n", STATUS_ROUTINE);
+			#ifdef __DEBUG__
+			printf("Routine running...\n");
+			#endif
 		
-		case ESTADO_SHOOT:
-			printf("##Estado SHOOT\n");
-			if(camera.getCameraMode() == PHOTO_MODE){
-					try{							
-						int n = 15;
-						while(n>=0){
-							gps.read_data();
-							n--;
-							cout<< "Pooling" << endl;
-						}
-						gps.read_data();								
-						digitalWrite(PIN_LED_GPS, LOW);
-						gps.setLocation();		
-						//cout << " passou " << endl;	
-						try{
-							camera.pressShutter(&gps.current_location);
-							digitalWrite(PIN_LED_CAMERA, LOW);
-											printf("##Interrupt Shutter ...2\n");			
-							}catch (CURLcode res){
-								#ifdef __DEBUG__
-								fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
-								#endif
-								digitalWrite(PIN_LED_CAMERA, HIGH);
-								STATUS_CAMERA = STATUS_ERROR;
-							}catch (const char* msg){
-								#ifdef __DEBUG__
-								perror(msg);
-								#endif
-								digitalWrite(PIN_LED_CAMERA, HIGH);
-								STATUS_CAMERA = STATUS_ERROR;
-							}		
-									
-				}catch (const char * msg){
-					cout << " catch2 " << endl;
-					#ifdef __DEBUG__
-					printf(msg);
-					#endif
-					digitalWrite(PIN_LED_GPS, HIGH);
-					camera.pressShutter(NULL);
-					//break;
-				}							
-				
-			}else{
-				printf("aqui1\n");
-				camera.pressShutter(NULL);			
-			}
-			
-			ESTADO_ATUAL = ESTADO_STANDBY;
-			break;
-
-		case ESTADO_NEWMODE:
-			camera.setNextMode();
-			ESTADO_ATUAL = ESTADO_STANDBY;
-			break;
-
-		case ESTADO_DWL:
-			try{
-				camera.writePhotoRecords();
-			}
-			catch (const char * msg){
-				printf(msg);
-			}
-
-			try{
-				camera.downloadAllPhotos();
-				digitalWrite(PIN_LED_DWL,LOW);
-			}
-			catch (CURLcode res){
-				fprintf(stderr, "ERRO - downloadImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
-				digitalWrite(PIN_LED_CAMERA, HIGH);
-				STATUS_CAMERA = STATUS_ERROR;
-			}
-			catch (const char* msg){
-				printf(msg);
-				digitalWrite(PIN_LED_CAMERA, HIGH);
-				STATUS_CAMERA = STATUS_ERROR;
-			}
-
-			try{
-				printf("Iniciando processo de impressão nas imagens.\n");
-				handler.stampCoordinates(camera.getPhotos());
-				printf("Processo de impressão finalizado\n");
-			}
-			catch (const char * msg){
-				//printf(msg);
-				cout << msg << endl;
-
-			}
-			ESTADO_ATUAL = ESTADO_STANDBY;
-			break;
-			
+		
 			
 			default:
 				break;

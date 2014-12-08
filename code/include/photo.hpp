@@ -21,6 +21,7 @@ class Photo
 		short id;
 		struct location loc;
 		bool downloaded;
+		bool stamped;
 
 		Photo(const short,const location*,string,bool);
 };
