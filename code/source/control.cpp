@@ -152,12 +152,14 @@ int main(int argc, char *argv[]){
 	}	
 	
 	try{
-		int n = 15;
+		int n = 8;
 		while(n>=0){
+			cout<< "Testando leitura do GPS" << endl;
 			gps.read_data();
 			n--;
-			cout<< "aquii" << endl;
 		}
+		digitalWrite(PIN_LED_GPS, LOW);
+		STATUS_GPS = STATUS_OK;
 	}catch(const char * msg){
 		perror(msg);
 		digitalWrite(PIN_LED_GPS, HIGH);
@@ -186,7 +188,7 @@ int main(int argc, char *argv[]){
 			printf("##Estado SHOOT\n");
 			if(camera.getCameraMode() == PHOTO_MODE){
 					try{							
-						int n = 15;
+						int n = 6;
 						while(n>=0){
 							gps.read_data();
 							n--;
@@ -198,8 +200,7 @@ int main(int argc, char *argv[]){
 						//cout << " passou " << endl;	
 						try{
 							camera.pressShutter(&gps.current_location);
-							digitalWrite(PIN_LED_CAMERA, LOW);
-											printf("##Interrupt Shutter ...2\n");			
+							digitalWrite(PIN_LED_CAMERA, LOW);			
 							}catch (CURLcode res){
 								#ifdef __DEBUG__
 								fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);

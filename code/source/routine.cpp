@@ -38,9 +38,9 @@
 
 #define ESTADO_STANDBY 1
 #define ESTADO_SHOOT 2
-#define ESTADO_DWL 3
-#define ESTADO_ROUTINE 4
-
+#define ESTADO_NEWMODE 3
+#define ESTADO_DWL 4
+#define ESTADO_ROUTINE 5
 
 const string filepath = "/home/pi/raspi_local_repo/code/quadra";
 
@@ -51,7 +51,8 @@ bool STATUS_GPS = false;
 bool STATUS_IN_TARGET = false;
 bool STATUS_ROUTINE = false;
 
-int volatile ESTADO_ATUAL;
+volatile int ESTADO;
+volatile int ESTADO_LOCAL;
 
 const char * GPS_ADDRESS = "localhost";
 unsigned int time_new = 0;
@@ -64,31 +65,31 @@ PhotoHandler handler;
 int setInterrupts(void);
 int setupWiringPi(void);
 void checkLEDs(void);
-
-void shutter(void){
-	time_new = millis();
-	if((time_new - time_old) < DEBOUNCING_TIME)
-		return;
-	ESTADO_ATUAL = ESTADO_SHOOT;	
-	time_old = time_new;
-	#ifdef __DEBUG__
-		printf("##Interrupt Shutter ...\n");
-	#endif
-}
-
-void nextMode(void) {
-	time_new = millis();
-	if((time_new - time_old) < DEBOUNCING_TIME)
-		return;
-	ESTADO_ATUAL = ESTADO_NEWMODE;
-	time_old = time_new;
-}
+void transferirFotos(void);
 
 void download(void) {
 	time_new = millis();
 	if((time_new - time_old) < DEBOUNCING_TIME)
 		return;
-	ESTADO_ATUAL = ESTADO_DWL;
+	transferirFotos();	
+	ESTADO = ESTADO_STANDBY;
+	time_old = time_new;
+}
+
+void startRoutine(void) {
+	time_new = millis();
+	if((time_new - time_old) < DEBOUNCING_TIME)
+		return;
+	#ifdef __DEBUG__
+		printf("##Interrupt routine ...\n");
+	#endif
+	if(ESTADO == ESTADO_STANDBY){
+		ESTADO = ESTADO_ROUTINE;
+		digitalWrite(PIN_LED_ROUTINE,LOW);
+	}else{
+		ESTADO = ESTADO_STANDBY;
+		digitalWrite(PIN_LED_ROUTINE,HIGH);
+	}
 	time_old = time_new;
 }
 
@@ -98,6 +99,62 @@ void driveLEDs_ALL_RED(){
 	digitalWrite(PIN_LED_TARGET, LOW);
 	digitalWrite(PIN_LED_DWL,LOW);
 	digitalWrite(PIN_LED_ROUTINE,LOW);	
+}
+
+void takePicture(){
+	try{
+		camera.takePicture(&gps.current_location);
+		digitalWrite(PIN_LED_CAMERA, LOW);
+		STATUS_CAMERA = STATUS_OK;
+		delay(2000);									
+		}catch (CURLcode res){
+			#ifdef __DEBUG__
+			fprintf(stderr, "##GoPro: takePicture() ERRO - takePicture(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+			#endif
+			digitalWrite(PIN_LED_CAMERA, HIGH);
+			STATUS_CAMERA = STATUS_ERROR;
+		}catch (const char* msg){
+			#ifdef __DEBUG__
+			perror(msg);
+			#endif
+			digitalWrite(PIN_LED_CAMERA, HIGH);
+			STATUS_CAMERA = STATUS_ERROR;
+		}
+}
+
+void transferirFotos(){
+			try{
+				camera.writePhotoRecords();
+			}
+			catch (const char * msg){
+				printf(msg);
+			}
+
+			try{
+				camera.downloadAllPhotos();
+				digitalWrite(PIN_LED_DWL,LOW);
+			}
+			catch (CURLcode res){
+				fprintf(stderr, "ERRO - downloadImage(): curl_easy_perform() failed: %s  ERRO NUMERO: %i\n", curl_easy_strerror(res), res);
+				digitalWrite(PIN_LED_CAMERA, HIGH);
+				STATUS_CAMERA = STATUS_ERROR;
+			}
+			catch (const char* msg){
+				printf(msg);
+				digitalWrite(PIN_LED_CAMERA, HIGH);
+				STATUS_CAMERA = STATUS_ERROR;
+			}
+
+			try{
+				printf("Iniciando processo de impressão nas imagens.\n");
+				handler.stampCoordinates(camera.getPhotos());
+				printf("Processo de impressão finalizado\n");
+			}
+			catch (const char * msg){
+				//printf(msg);
+				cout << msg << endl;
+
+			}			
 }
 
 int main(int argc, char *argv[]){
@@ -153,11 +210,11 @@ int main(int argc, char *argv[]){
 	}	
 	
 	try{
-		int n = 15;
+		int n = 10;
 		while(n>=0){
+			cout<< "Testando leitura do GPS" << endl;
 			gps.read_data();
 			n--;
-			cout<< "aquii" << endl;
 		}
 		digitalWrite(PIN_LED_GPS, LOW);
 		STATUS_GPS = STATUS_OK;
@@ -167,8 +224,6 @@ int main(int argc, char *argv[]){
 		STATUS_GPS = STATUS_ERROR;
 	}
 	
-	digitalWrite(PIN_LED_GPS, HIGH);
-		STATUS_GPS = STATUS_ERROR;
 	
 	try{
 		setInterrupts();
@@ -180,28 +235,42 @@ int main(int argc, char *argv[]){
 
 
 	camera.setCameraMode(PHOTO_MODE);
-	ESTADO_ATUAL = ESTADO_STANDBY;
 	
 	while(true){
-
-		switch (ESTADO_ATUAL){
-		case ESTADO_STANDBY:
-			break;
-			
-		case ESTADO_ROUTINE:
-			printf("Status routine %d\n", STATUS_ROUTINE);
-			#ifdef __DEBUG__
-			printf("Routine running...\n");
-			#endif
-		
-		
-			
-			default:
-				break;
+	ESTADO_LOCAL = ESTADO;
+	if(ESTADO_LOCAL == ESTADO_ROUTINE){
+		#ifdef __DEBUG__
+		//printf("Routine running...\n");
+		#endif					
+		try{				
+			gps.read_data();								
+			digitalWrite(PIN_LED_GPS, LOW);
+			gps.setLocation();
+			//if(area.inTarget(gps.current_location.coordinate)){
+			if(1){
+				cout << "In region of interest!" << endl;
+				digitalWrite(PIN_LED_TARGET, LOW);		
+				takePicture();
+			}else{
+				digitalWrite(PIN_LED_TARGET, HIGH);							
+			}
+			}catch (const char * msg){
+				cout << " catch2 " << endl;
+				#ifdef __DEBUG__
+				printf(msg);
+				#endif
+				digitalWrite(PIN_LED_GPS, HIGH);
+				camera.pressShutter(NULL);
+			}
+					
+		}else{
+			//cout << " stand by" << endl;
 		}
 	}
 	return 0;
 }
+
+
 
 int setupWiringPi(){
 	
@@ -226,7 +295,7 @@ int setInterrupts(void){
 	
 	printf("##INIT Stetting interrupts...\n");
 	
-
+	/*
 	if( wiringPiISR (PIN_MODE, INT_EDGE_FALLING, &nextMode) < 0) {
 		throw("Unable to setup ISR: nextMode %s\n");
       		return -1;
@@ -236,8 +305,14 @@ int setInterrupts(void){
 		throw("Unable to setup ISR: shutter %s\n");
       		return -1;
   	}
+  	* */
   	
 	if (wiringPiISR(PIN_DWL, INT_EDGE_FALLING, &download) < 0) {
+		throw("Unable to setup ISR: startRoutine %s\n");
+      		return -1;
+  	}
+  	
+  	if( wiringPiISR (PIN_START, INT_EDGE_FALLING, &startRoutine) < 0) {
 		throw("Unable to setup ISR: startRoutine %s\n");
       		return -1;
   	}

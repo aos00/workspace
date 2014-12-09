@@ -5,7 +5,7 @@
 *	@Date: October, 2014.
 */
 
-//#define __DEBUG__
+#define __DEBUG__
 
 #include <iostream>
 #include <fstream>
