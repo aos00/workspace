@@ -42,7 +42,7 @@
 #define ESTADO_DWL 4
 #define ESTADO_ROUTINE 5
 
-const string filepath = "/home/pi/raspi_local_repo/code/quadra";
+const string filepath = "/home/pi/raspi_local_repo/code/engenharia";
 
 using namespace std;
 
@@ -224,6 +224,15 @@ int main(int argc, char *argv[]){
 		STATUS_GPS = STATUS_ERROR;
 	}
 	
+	try{
+		area.init(filepath);
+		digitalWrite(PIN_LED_TARGET, LOW);
+		STATUS_IN_TARGET = 0;
+	}catch (const char * msg){
+		perror(msg);
+		digitalWrite(PIN_LED_TARGET, HIGH);
+		STATUS_IN_TARGET = STATUS_ERROR;
+	}
 	
 	try{
 		setInterrupts();
@@ -233,7 +242,7 @@ int main(int argc, char *argv[]){
 		return -1;
 	}
 
-
+	ESTADO = ESTADO_STANDBY;
 	camera.setCameraMode(PHOTO_MODE);
 	
 	while(true){
@@ -246,8 +255,8 @@ int main(int argc, char *argv[]){
 			gps.read_data();								
 			digitalWrite(PIN_LED_GPS, LOW);
 			gps.setLocation();
-			//if(area.inTarget(gps.current_location.coordinate)){
-			if(1){
+			if(area.inTarget(gps.current_location.coordinate)){
+			//if(1){
 				cout << "In region of interest!" << endl;
 				digitalWrite(PIN_LED_TARGET, LOW);		
 				takePicture();

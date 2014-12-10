@@ -157,7 +157,7 @@ bool GoPro::downloadImage(short ID)
 	if(curl == NULL) throw("downloadImage: Curl initialization error !");
 
 	fp = fopen(filename, "wb");
-	if(fp == NULL) throw("downloadImage: open file error !");
+	if(fp == NULL) throw("#GoPro: downloadImage: open file error! Caminho de destino não encontrado!!\n");
 
 	if(curl_easy_setopt(curl, CURLOPT_URL, url) !=  CURLE_OK) throw("downloadImage: curl set url opt error !");
 	if(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL) != CURLE_OK) throw("downloadImage: curl set write function opt error !");

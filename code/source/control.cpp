@@ -194,7 +194,10 @@ int main(int argc, char *argv[]){
 							n--;
 							cout<< "Pooling" << endl;
 						}
-						gps.read_data();								
+						if(gps.read_data() == 2){
+							digitalWrite(PIN_LED_GPS, HIGH);
+							camera.pressShutter(NULL);							
+						}else{
 						digitalWrite(PIN_LED_GPS, LOW);
 						gps.setLocation();		
 						//cout << " passou " << endl;	
@@ -214,7 +217,7 @@ int main(int argc, char *argv[]){
 								digitalWrite(PIN_LED_CAMERA, HIGH);
 								STATUS_CAMERA = STATUS_ERROR;
 							}		
-									
+						}			
 				}catch (const char * msg){
 					cout << " catch2 " << endl;
 					#ifdef __DEBUG__

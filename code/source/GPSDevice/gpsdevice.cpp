@@ -85,7 +85,7 @@ int GPSDevice::read_data()
 		return 1;
 	}else{
 		printf("##GPSDevice readd_data(): Latitude or Longitude is NaN\n");
-		return 0;
+		return 2;
 	
 	}
 }
