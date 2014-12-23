@@ -1,12 +1,14 @@
+
 //#define __FUNCAO_PRINCIPAL__
-//#define __TESTE_NDVI_IMG_DISCO__
 //#define __TESTE_DAS_FUNCOES_NDVI__
 //#define __TESTE_WEBCAM__
 //#define __LER_IMG_DISCO__
 //#define __MANIPULANDO_MAT_CONSTANTES__
 //#define __TESTE_DAS_FUNCOES_NDVI__
-//#define __USING_NDVI_VGYRM_LUT_COLORMAP__ //em desenvolvimento
-#define __FINAL__
+//#define __PROCESSAMENTO_DA_FOTO_CAPTURADA__
+//#define _PROCESSAMENTO_DA_IMAGEM_NO_DISCO__
+#define _CONTROL_PARAMS_CHANNELS_
+#define _FROM_DISK_
 
 #include <iostream>
 #include <stdio.h>
@@ -15,7 +17,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
-#define RUIDO_INFERIOR 5
+#define RUIDO_INFERIOR 1
 
 #define BAND_PASS_LOW_NOISE 0.3
 #define BAND_PASS_HIGH_NOISE 0.7
@@ -47,7 +49,7 @@ Green Channel: (25-(bluechannel+redchannel)
 */
 void ndviCalculation(Mat& src, Mat& dst){
 
-	CV_Assert(src.type() == CV_8UC3); //Garantir que o frame possui 3 canais
+	CV_Assert(src.type() == CV_8UC3 || src.type() == CV_32FC3); //Garantir que o frame possui 3 canais
 	CV_Assert(dst.type() == CV_32FC1); //Garantir que a matriz de saida tem 1 canal (Grayscale)
 	CV_Assert(src.isContinuous()); //Garantir que a matriz é continua
 
@@ -73,7 +75,7 @@ void ndviCalculation(Mat& src, Mat& dst){
 
 	////Dividir os canais
 	divide(subtracao, soma, dst, 1, CV_32F);
-
+	
 #ifdef _DEBUG_NDVI_CALC_
 	cout << "NDVI Calculation: Canal Vermelho: " << (int)rgb[2].at<uchar>(30, 30) << endl;
 	cout << "NDVI Calculation: Canal Azul: " << (int)rgb[0].at<uchar>(30, 30) << endl;
@@ -340,7 +342,7 @@ CV_Assert(src.type() == CV_8UC1);
 CV_Assert(dst.type() == CV_8UC3);
 
 //Might not be the most efficient way of accessing each channel
-//but this is what is available for tdy
+//but this is what is available for tdy (é o que tem pra hoje)
 Mat rgb[3];
 split(src, rgb);
 
@@ -354,66 +356,7 @@ rgb[2][i] = red_LUT[rgb[2][i]];
 
 #endif
 
-#ifdef __FUNCAO_PRINCIPAL__
 
-//----CALCULO DO NDVI COM WEBCAM-----------------------
-
-int main(int argc, const char** argv){
-	short limiteInferior = 5;
-	Mat frame;
-
-	VideoCapture capture(CV_CAP_ANY);
-
-	CV_Assert(capture.isOpened());
-
-	cout << "In capure ..." << endl;
-
-	frameSize = frame.size();
-
-	Mat gray(frameSize, CV_8UC1);
-	Mat ndvi(frameSize, CV_32FC1);
-
-	for (;;){
-		capture >> frame;
-
-
-		//Mat rgb[3];
-		//split(frame, rgb);
-
-		//imshow("Vermelho", rgb[2]);
-
-
-		imshow("Frame", frame);
-
-		//cout << frame << endl;
-		//
-		ndviCalculation(frame, ndvi); //Calculate NDVI
-
-		//imshow("NDVI", ndvi);
-
-		convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
-
-		imshow("gray", gray);
-
-		colormapFromGray(gray, frame);
-
-		imshow("False color", frame);
-
-		if (waitKey(10) >= 0)
-			break;
-	}
-	waitKey(0);
-
-	//}
-	//cvReleaseCapture(&capture);
-	//cvDestroyWindow("NDVI");
-	destroyAllWindows();
-
-
-	return 0;
-}
-
-#endif
 
 #ifdef __MANIPULANDO_MAT_CONSTANTES__
 
@@ -839,14 +782,13 @@ void colormapFromGray(Mat& src, Mat& dst){
 #endif
 
 
-#ifdef __TESTE_NDVI_IMG_DISCO__
+#ifdef _PROCESSAMENTO_DA_IMAGEM_NO_DISCO__
 
 //------------------ Teste do NDVI com imagem do disco -------------------------
 
 int main(int argc, const char** argv){
 
-	Mat localImage = imread("imagem9.png", 1);
-	//Mat infragramImage = imread("estufa.jpg", 1);
+	Mat localImage = imread("estufa.jpg", 1);
 	Mat grayndvi(frameSize, CV_8UC1);
 
 	frameSize = localImage.size();
@@ -859,37 +801,19 @@ int main(int argc, const char** argv){
 		system("pause");
 		return -1;
 	}
-	//if (!infragramImage.data)
-	//{
-	//	cout << "Could not open infragram image" << std::endl;
-	//	system("pause");
-	//	return -1;
-	//}
-
+	
 
 	ndviCalculation(localImage, ndvi);
-
-	bandPassFilter(ndvi, ndvi, BAND_PASS_LOW_NOISE, BAND_PASS_HIGH_NOISE);
-
-	//cout << ndvi << endl;
+	//bandPassFilter(ndvi, ndvi, BAND_PASS_LOW_NOISE, BAND_PASS_HIGH_NOISE);
 	convertToGrayScale(ndvi, grayndvi);
-	//cout << grayndvi << endl;
-	////cout << "Image type:" << infragramImage
-	//cout << "Frame size:" << frameSize << endl;
-	//cout << "Local ndvi " << (int) grayndvi.at<uchar>(0,0) << endl;
-	//cout << "Infragram ndvi " << (int)infragramImage.at<uchar>(0,0) << endl;
-
 	imshow("Gray ndvi", grayndvi);
-	//waitKey(1);
-	//imshow("Infragram", infragramImage);
-	//imshow("Original", localImage);
 	waitKey(0);
 
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
 	compression_params.push_back(100);
 
-	imwrite("imagem9-posproc.JPG", grayndvi, compression_params);
+	imwrite("teste.JPG", grayndvi, compression_params);
 	//system("pause");
 
 	destroyAllWindows();
@@ -898,18 +822,7 @@ int main(int argc, const char** argv){
 
 #endif
 
-#ifdef __USING_NDVI_VGYRM_LUT_COLORMAP__ 
-
-int main(){
-
-	system("pause");
-	return 0;
-}
-
-#endif
-
-
-#ifdef __FINAL__
+#ifdef __PROCESSAMENTO_DA_FOTO_CAPTURADA__
 
 int main(int argc, const char** argv){
 	VideoCapture capture;
@@ -937,12 +850,235 @@ int main(int argc, const char** argv){
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
 	compression_params.push_back(100);
-	imwrite("frame.JPG", grayndvi, compression_params);
+	imwrite("teste.JPG", grayndvi, compression_params);
 
 	return 1;
 }
 
 
 
+
+#endif
+
+#ifdef __FUNCAO_PRINCIPAL__
+
+//----CALCULO DO NDVI COM WEBCAM-----------------------
+
+int main(int argc, const char** argv){
+	short limiteInferior = 5;
+	Mat frame;
+
+	VideoCapture capture(CV_CAP_ANY);
+
+	CV_Assert(capture.isOpened());
+
+	cout << "In capure ..." << endl;
+
+	frameSize = frame.size();
+
+	Mat gray(frameSize, CV_8UC1);
+	Mat ndvi(frameSize, CV_32FC1);
+
+	for (;;){
+		capture >> frame;
+
+
+		//Mat rgb[3];
+		//split(frame, rgb);
+
+		//imshow("Vermelho", rgb[2]);
+
+
+		imshow("Frame", frame);
+
+		//cout << frame << endl;
+		//
+		ndviCalculation(frame, ndvi); //Calculate NDVI
+
+		convertToGrayScale(ndvi, gray); //Convert ndvi matrix to 8 bit gray scale
+
+		imshow("gray", gray);
+
+		//colormapFromGray(gray, frame);
+
+		//imshow("False color", gray);
+
+		if (waitKey(10) >= 0)
+			break;
+	}
+	waitKey(0);
+
+	//}
+	//cvReleaseCapture(&capture);
+	//cvDestroyWindow("NDVI");
+	destroyAllWindows();
+
+
+	return 0;
+}
+
+#endif
+
+
+#ifdef _CONTROL_PARAMS_CHANNELS_
+
+int main(int argc, const char** argv){
+	Mat frame;
+	vector<Mat> bgr_planes, ndvi_gray;
+	char key;
+
+	Mat grayndvi(frameSize, CV_8UC1);
+	Mat ndvi(frameSize, CV_32FC1);
+	Mat color(frameSize, CV_8UC3);
+
+	//optimal values?
+	int bri_B = 0, bri_R = 130;
+	int con_B = 50, con_R = 50;
+
+	namedWindow("CONTROLS", 1);
+	createTrackbar("B Brighness", "CONTROLS", &bri_B, 200, NULL);
+	createTrackbar("B Contrast", "CONTROLS", &con_B, 100, NULL);
+	createTrackbar("R Brighness", "CONTROLS", &bri_R, 200, NULL);
+	createTrackbar("R Contrast", "CONTROLS", &con_R, 100, NULL);
+
+#ifdef _FROM_DISK_
+	frame = imread("imagem9.png", 1);
+	frameSize = frame.size();
+	if (!frame.data)
+	{
+		cout << "Erro ao abrir a imagem do disco" << std::endl;
+		system("pause");
+		return -1;
+	}
+
+#endif
+
+	cout << "aqui!" << endl;
+
+#ifdef _FROM_CAMERA_
+	VideoCapture capture;
+	capture.open(CV_CAP_ANY);
+
+	if (!capture.isOpened())
+	{
+		cout << "Nenhuma camera detectada" << endl;
+		return -1;
+
+	}
+#endif
+
+	float op1, op2;
+	//Mat frame2(frameSize, CV_32FC3);
+	Mat frame2;
+	Mat blue(frameSize, CV_32FC3);
+	Mat red(frameSize, CV_32FC3);
+	Mat green(frameSize, CV_32FC3);
+	Mat frame3(frameSize, CV_8UC3);
+	while (1){
+
+#ifdef _FROM_CAMERA_
+		capture >> frame; //get frame
+#endif
+
+		split(frame, bgr_planes); // Separate the image in 3 channel
+
+		//cout << "NDVI Calculation: Canal Vermelho: " << (int)bgr_planes[2].at<uchar>(400, 400) << endl;
+		//cout << "NDVI Calculation: Canal Azul: " << (int)bgr_planes[0].at<uchar>(400, 400) << endl;
+
+
+		bgr_planes[0].convertTo(bgr_planes[0], CV_32F);
+		bgr_planes[1].convertTo(bgr_planes[1], CV_32F);
+		bgr_planes[2].convertTo(bgr_planes[2], CV_32F);
+
+		op1 = (float)con_B / 100;
+		op2 = (float)bri_B - 50;
+		multiply(bgr_planes[0], op1, bgr_planes[0], 1, CV_32F);		
+		add(bgr_planes[0], op2, bgr_planes[0], noArray(), CV_32F);
+
+		op1 = (float)con_R / 100;
+		op2 = (float)bri_R - 50;
+		
+		multiply(bgr_planes[2], op1, bgr_planes[2], 1, CV_32F);
+		add(bgr_planes[2], op2, bgr_planes[2], noArray(), CV_32F);
+
+		/*bgr_planes[0] = ((float)con_B / 100)*(bgr_planes[0]) + bri_B - 50;
+		
+		bgr_planes[2] = ((float)con_R / 100)*(bgr_planes[2]) + bri_R - 50;*/
+		
+		merge(bgr_planes, frame2);		
+		
+		ndviCalculation(frame2, ndvi);
+
+		//cout << "NDVI " << (float)ndvi.at<float>(400,400) << endl;
+
+		convertToGrayScale(ndvi, grayndvi);
+		
+		colormapFromGray(grayndvi, frame3);
+		
+		split(ndvi, ndvi_gray);
+
+		key = cvWaitKey(10);     //Capture Keyboard stroke
+		if (char(key) == 27){   //ESC
+			break;
+		}
+
+		//CALCULO DOS HISTOGRAMAS
+		int histSize = 256;
+
+		float range[] = { 0, 256 };
+		const float* histRange = { range };
+
+		bool uniform = true; bool accumulate = false;
+
+		Mat b_hist, g_hist, r_hist;
+
+		/// Compute the histograms:
+		calcHist(&bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate);
+		calcHist(&bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate);
+		calcHist(&ndvi_gray[0], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate);
+
+		// Draw the histograms for B, G and R
+		int hist_w = 512; int hist_h = 400;
+		int bin_w = cvRound((double)hist_w / histSize);
+
+		Mat histImage(hist_h, hist_w, CV_8UC3, Scalar(0, 0, 0));
+		Mat histNDVI(hist_h, hist_w, CV_8UC1, Scalar(0, 0, 0));
+
+		/// Normalize the result to [ 0, histImage.rows ]
+		normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+		normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+		normalize(g_hist, g_hist, 0, histNDVI.rows, NORM_MINMAX, -1, Mat());
+
+		/// Draw for each channel
+		for (int i = 1; i < histSize; i++)
+		{
+			line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(b_hist.at<float>(i - 1))),
+				Point(bin_w*(i), hist_h - cvRound(b_hist.at<float>(i))),
+				Scalar(255, 0, 0), 2, 8, 0);
+			line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(r_hist.at<float>(i - 1))),
+				Point(bin_w*(i), hist_h - cvRound(r_hist.at<float>(i))),
+				Scalar(0, 0, 255), 2, 8, 0);
+			line(histNDVI, Point(bin_w*(i - 1), hist_h - cvRound(g_hist.at<float>(i - 1))),
+				Point(bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) + 100),
+				Scalar(150, 150, 150), 2, 8, 0);
+		}
+
+		//-------------------------------------------
+
+		imshow("Hist Image", histImage);
+		imshow("Hist NDVI", histNDVI);
+		imshow("imagem", grayndvi);
+		imshow("colores", frame3);
+		//-------------------/
+
+	}
+
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(100);
+	imwrite("escala-cinza.JPG", grayndvi, compression_params);
+	imwrite("colormap.JPG", frame3, compression_params);
+
+}
 
 #endif
