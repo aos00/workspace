@@ -1,0 +1,103 @@
+http://www.stemapks.com/opencv.html
+http://docs.opencv.org/trunk/doc/tutorials/introduction/linux_install/linux_install.html
+/***
+*** Very Important Note ***
+This installation guide serves as a GUIDE, not as a substitution to actually knowing what you are installing, and using Google to help you to understand what is the best option for your particular situation.
+Before you use this installation guide please:
+do not just copy and paste blindly into your Raspberry Pi terminal, make sure that you know what you are copying and pasting, because packages may have changed, and names, zip files, urls, sourceforge file sources, etc. may not be the same.
+Also follow the annotations on the video, they are there for a reason, things may have changed since I uploaded the video.
+If you follow my advice it may save you countless painful hours later, of trying to find out where you went wrong during the installation process. You have been warned. Please take the advice, and enjoy OpenCV on your Raspberry Pi !!!! 
+/****
+Installation Steps:
+#Make sure to have ssh enabled during configuration:
+#For you to be able to use the X11 Forwarding and be able to use the ssh -X to get into your raspberry pi, you need to get into your /etc/ssh/ssh_config file and make some changes. If this is not done, and you try to use it, it will give you a gtk warning error that cannot display the gui on your desktop. Follow the following link for more information: http://www.raspberrypi.org/forums/viewtopic.php?t=27387&p=244451
+ssh -X pi@192.168.1.33
+#If your ssh it is not yet enabled, you can reconfigure it by applying the following command:
+sudo raspi-config
+***** Very Important *****
+#and in advanced options:  
+ssh     enabled
+camera   enabled
+expand filesystem  enabled    (SD Card Total Disk Usage command, you might need to reboot         to see it expanded)
+sudo apt-get update
+sudo apt-get upgrade
+#check to see that your webcam, or pi-cam is being read by your pi:
+lsusb
+#you can test it by downloading the following
+sudo apt-get install guvcview
+#and enter the following command:
+guvcview
+#for easy package installation you can download synaptic
+sudo apt-get install synaptic
+#install the python scipy stack
+sudo apt-get install python-numpy python-scipy python-matplotlib        
+ipython- notebook python-pandas python-sympy python-nose
+#to get the OpenCV zip or the tar.bz2 or the tar.gz:
+wget http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.4.9/opencv-2.4.9.zip
+#install basic development environment
+sudo apt-get install build-essential cmake pkg-config
+sudo apt-get install default-jdk ant
+sudo apt-get install libgtkglext1-dev
+sudo apt-get install bison
+sudo apt-get install qt4-dev-tools libqt4-dev libqt4-core libqt4-gui
+sudo apt-get install v4l-utils
+sudo apt-get install qtcreator           (you do not really have to have it)
+
+###
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+###
+
+#not on the original video tutorial
+#more raspberry pi specific opencv-related dependencies that will make your life much easier
+sudo apt-get install libjpeg8 libjpeg8-dev libjpeg8-dbg libjpeg-progs ffmpeg libavcodec-dev libavcodec53 libavformat53 libavformat-dev libgstreamer0.10-0-dbg libgstreamer0.10-0 libgstreamer0.10-dev libxine1-ffmpeg libxine-dev libxine1-bin libunicap2 libunicap2-dev swig libv4l-0 libv4l-dev python-numpy libpython2.7 python-dev python2.7-dev libgtk2.0-dev
+#ready to start compiling opencv
+#now extract the opencv folder by unzipping the zip file you downloaded from Sourceforge
+unzip opencv-2.4.9.zip
+#change directory to the folder that you just extracted
+cd opencv-2.4.9.1
+#create a directory called build
+mkdir build
+#change into that recently created directory
+cd build
+#very important step to create the flags and instructions for the compilation process
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D INSTALL_C_EXAMPLES=ON -D INSTALL_CPP_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON -D WITH_QT=ON -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_OPENGL=ON -D WITH_V4L=ON ..
+#now you are ready for make
+sudo make
+#and now you are ready to install  ***very important make sure you include sudo with the command
+sudo make install
+#create the following file:
+sudo nano /etc/ld.so.conf.d/opencv.conf
+#enter the following line into the empty file:
+/usr/local/lib
+#after saving the file, enter the following command:
+sudo ldconfig
+#open your bash.bashrc file by entering the command:
+sudo nano /etc/bash.bashrc
+#in your bash.bashrc file enter the following two lines at the end of the document:
+PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH
+#save it and close the terminal, and log back in by opening a new terminal to make sure your changes to the bash.bashrc file take effect.
+#Testing to make sure that everything is working properly:
+#open the c samples directory:
+cd ~/OpenCV-2.4.9/samples/c
+chmod +x build_all.sh
+./build_all.sh
+#find an executable and run it by entering the following:
+./facedetect
+#if you want to test the python, go to the python directory and enter the following:
+#python name_of_the_file.py
+e.g   python facedetect.py
+#and it will run.
+
+
+#Instalando o QT5 
+Edit the file: /etc/apt/sources.list and add:
+deb http://twolife.be/raspbian/ wheezy main backports
+deb-src http://twolife.be/raspbian/ wheezy main backports
+
+Install the required key:
+$sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 2578B775
+
+Then get Qt5 and esoteric requirements installed:
+$ sudo apt-get update
+$ sudo apt-get install qt5-default qt5-qmake libegl1-mesa libgles2-mesa
